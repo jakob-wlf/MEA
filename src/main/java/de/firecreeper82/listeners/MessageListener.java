@@ -8,6 +8,7 @@ public class MessageListener extends ListenerAdapter {
 
     @Override
     public void onMessageReceived(MessageReceivedEvent e) {
+        //TODO implement slash command logic
         if(e.getMessage().getContentRaw().startsWith(Main.PREFIX))
             Main.commandManager.onCommand(e.getMessage());
     }

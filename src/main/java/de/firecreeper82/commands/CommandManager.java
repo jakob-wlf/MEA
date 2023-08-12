@@ -1,10 +1,14 @@
 package de.firecreeper82.commands;
 
+import de.firecreeper82.exceptions.ExceptionHandler;
+import de.firecreeper82.exceptions.exceptions.CommandNotFoundException;
+import de.firecreeper82.exceptions.exceptions.WrongPermissionsException;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.Role;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Optional;
+import java.util.List;
 
 public class CommandManager {
 
@@ -15,23 +19,28 @@ public class CommandManager {
     }
 
     public void onCommand(Message msg) {
-        String commandString = msg.getContentRaw().toLowerCase().substring(1).split(" ")[0];
+        try {
+            String commandString = msg.getContentRaw().toLowerCase().substring(1).split(" ")[0];
 
-        Optional<Command> optionalCommand = commands.stream().filter(cmd -> Arrays.asList(cmd.aliases).contains(commandString)).findFirst();
-        if(optionalCommand.isEmpty()) {
-            commandNotFound(msg, commandString);
-            return;
+            Command command = commands.stream()
+                    .filter(cmd -> Arrays.asList(cmd.aliases).contains(commandString))
+                    .findFirst()
+                    .orElseThrow(() -> new CommandNotFoundException("The command \"" + commandString + "\" doesn't exist."));
+
+            if (msg.getMember() == null)
+                throw new NullPointerException("The user of the command seems to be null.");
+
+
+            //TODO check for correct args as specified in command
+
+            List<String> ids = msg.getMember().getRoles().stream().map(Role::getId).toList();
+            if (Arrays.stream(command.requiredPerm.getIds()).noneMatch(ids::contains))
+                throw new WrongPermissionsException("You don't have the right permissions to use this command.");
+
+            command.onCommand(msg.getContentRaw().substring(commandString.length() + 2).split(" "), msg, msg.getMember());
+        } catch (Exception e) {
+            ExceptionHandler.handleException(msg, e);
         }
-
-
-        Command command = optionalCommand.get();
-        command.onCommand(msg.getContentRaw().toLowerCase().substring(commandString.length() + 1).split(" "), msg);
-
-
-
-    }
-    private void commandNotFound(Message message, String cmd) {
-
     }
 
     public void addCommand(Command command) {
