@@ -8,17 +8,21 @@ import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 
+import java.io.*;
 import java.util.Arrays;
 
 public class Main {
 
-    public static final String TOKEN = "MTEzOTkxNTQxMTk2NjY3Mjk5OA.GmN9FF._bKAQEErk63F309DWdXmEoPp8Rp02RJfqid2sc";
+    public static String TOKEN;
     public static final String PREFIX = "!";
 
     public static JDA jda;
     public static CommandManager commandManager;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
+        BufferedReader reader = new BufferedReader(new FileReader("src/main/resources/token.txt"));
+        TOKEN = reader.readLine();
+
         jda = JDABuilder.createDefault(TOKEN)
                 .setActivity(Activity.watching("you"))
                 .enableIntents(GatewayIntent.MESSAGE_CONTENT)
