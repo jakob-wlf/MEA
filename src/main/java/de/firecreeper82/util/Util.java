@@ -19,6 +19,7 @@ public class Util {
             mentionid = mentionid.substring(2, mentionid.length()-1);
 
             if (mentionid.matches("^[0-9]*$")) {
+                g.retrieveMemberById(mentionid).queue();
                 return g.getMemberById(mentionid);
             }else {
                 return null;
@@ -31,6 +32,16 @@ public class Util {
             }else {
                 return null;
             }
+        }
+    }
+
+    public static boolean isInt(String s) {
+        try {
+            Integer.parseInt(s);
+            return true;
+        }
+        catch (Exception e) {
+            return false;
         }
     }
 

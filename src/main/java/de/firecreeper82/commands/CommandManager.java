@@ -2,6 +2,7 @@ package de.firecreeper82.commands;
 
 import de.firecreeper82.exceptions.ExceptionHandler;
 import de.firecreeper82.exceptions.exceptions.CommandNotFoundException;
+import de.firecreeper82.exceptions.exceptions.WrongArgumentsException;
 import de.firecreeper82.exceptions.exceptions.WrongPermissionsException;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Role;
@@ -31,13 +32,16 @@ public class CommandManager {
                 throw new NullPointerException("The user of the command seems to be null.");
 
 
-            //TODO check for correct args as specified in command
+            String[] args = msg.getContentRaw().substring(commandString.length() + 2).split(" ");
+
+            if(args.length < command.getRequiredArgs().size())
+                throw new WrongArgumentsException("Your arguments do not match the syntax ``" + command.getSyntax() + "``.");
 
             List<String> ids = msg.getMember().getRoles().stream().map(Role::getId).toList();
             if (Arrays.stream(command.requiredPerm.getIds()).noneMatch(ids::contains))
-                throw new WrongPermissionsException("You don't have the right permissions to use this command.");
+                throw new WrongPermissionsException("You don't have the permissions to use this command.");
 
-            command.onCommand(msg.getContentRaw().substring(commandString.length() + 2).split(" "), msg, msg.getMember());
+            command.onCommand(args, msg, msg.getMember());
         } catch (Exception e) {
             ExceptionHandler.handleException(msg, e);
         }

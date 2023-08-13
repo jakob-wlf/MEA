@@ -1,6 +1,8 @@
 package de.firecreeper82;
 
 import de.firecreeper82.commands.CommandManager;
+import de.firecreeper82.commands.impl.BanCmd;
+import de.firecreeper82.commands.impl.ClearCmd;
 import de.firecreeper82.commands.impl.KickCmd;
 import de.firecreeper82.listeners.MessageListener;
 import de.firecreeper82.permissions.Permission;
@@ -8,6 +10,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -15,6 +18,7 @@ import org.json.simple.parser.ParseException;
 import java.io.*;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 public class Main {
 
@@ -34,6 +38,8 @@ public class Main {
         jda = JDABuilder.createDefault(TOKEN)
                 .setActivity(Activity.watching("you"))
                 .enableIntents(GatewayIntent.MESSAGE_CONTENT)
+                .enableIntents(GatewayIntent.GUILD_MEMBERS)
+                .setMemberCachePolicy(MemberCachePolicy.ALL)
                 .addEventListeners(new MessageListener())
                 .build();
 
@@ -44,6 +50,19 @@ public class Main {
                 Arrays.asList("User", "Reason"),
                 Permission.MODERATION
         ));
+        commandManager.addCommand(new ClearCmd(
+                new String[]{"clear", "purge"},
+                "Clear the chat",
+                List.of("Messagecount"),
+                Permission.MODERATION
+        ));
+        commandManager.addCommand(new BanCmd(
+                new String[]{"ban"},
+                "Ban a user from the server",
+                List.of("User", "Reason"),
+                Permission.ADMIN
+        ));
+
 
         readConfig();
     }
