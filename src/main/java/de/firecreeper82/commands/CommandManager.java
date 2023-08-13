@@ -4,6 +4,7 @@ import de.firecreeper82.exceptions.ExceptionHandler;
 import de.firecreeper82.exceptions.exceptions.CommandNotFoundException;
 import de.firecreeper82.exceptions.exceptions.WrongArgumentsException;
 import de.firecreeper82.exceptions.exceptions.WrongPermissionsException;
+import de.firecreeper82.permissions.Permission;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Role;
 
@@ -41,7 +42,7 @@ public class CommandManager {
                 throw new WrongArgumentsException("Your arguments do not match the syntax ``" + command.getSyntax() + "``.");
 
             List<String> ids = msg.getMember().getRoles().stream().map(Role::getId).toList();
-            if (Arrays.stream(command.requiredPerm.getIds()).noneMatch(ids::contains))
+            if (Arrays.stream(command.requiredPerm.getIds()).noneMatch(ids::contains) && command.requiredPerm != Permission.MEMBER)
                 throw new WrongPermissionsException("You don't have the permissions to use this command.");
 
             command.onCommand(args, msg, msg.getMember());
@@ -54,4 +55,7 @@ public class CommandManager {
         commands.add(command);
     }
 
+    public ArrayList<Command> getCommands() {
+        return commands;
+    }
 }

@@ -1,10 +1,7 @@
 package de.firecreeper82;
 
 import de.firecreeper82.commands.CommandManager;
-import de.firecreeper82.commands.impl.BanCmd;
-import de.firecreeper82.commands.impl.ClearCmd;
-import de.firecreeper82.commands.impl.KickCmd;
-import de.firecreeper82.commands.impl.MuteCmd;
+import de.firecreeper82.commands.impl.*;
 import de.firecreeper82.listeners.MessageListener;
 import de.firecreeper82.permissions.Permission;
 import net.dv8tion.jda.api.JDA;
@@ -70,6 +67,12 @@ public class Main {
                 "Ban a user from the server",
                 List.of("User", "Mute Duration (1m/1h/1d/1w/infinite)", "Reason"),
                 Permission.ADMIN
+        ));
+        commandManager.addCommand(new HelpCmd(
+                new String[]{"help"},
+                "List all commands",
+                List.of(),
+                Permission.MEMBER
         ));
 
 
