@@ -4,6 +4,7 @@ import de.firecreeper82.commands.CommandManager;
 import de.firecreeper82.commands.impl.BanCmd;
 import de.firecreeper82.commands.impl.ClearCmd;
 import de.firecreeper82.commands.impl.KickCmd;
+import de.firecreeper82.commands.impl.MuteCmd;
 import de.firecreeper82.listeners.MessageListener;
 import de.firecreeper82.permissions.Permission;
 import net.dv8tion.jda.api.JDA;
@@ -27,6 +28,8 @@ public class Main {
 
     private static String adminRoleId;
     private static String moderationRoleId;
+    private static boolean notifyUserAtModerationAction;
+    private static String mutedRoleId;
 
     public static JDA jda;
     public static CommandManager commandManager;
@@ -62,12 +65,26 @@ public class Main {
                 List.of("User", "Reason"),
                 Permission.ADMIN
         ));
+        commandManager.addCommand(new MuteCmd(
+                new String[]{"mute", "m"},
+                "Ban a user from the server",
+                List.of("User", "Mute Duration (1m/1h/1d/1w/infinite)", "Reason"),
+                Permission.ADMIN
+        ));
 
 
         readConfig();
     }
 
-    public static HashMap<String, String> readConfig(){
+    public static HashMap<String, String> getRoleIds() {
+        readConfig();
+        HashMap<String, String> values = new HashMap<>();
+        values.put("admin", adminRoleId);
+        values.put("moderation", moderationRoleId);
+        return values;
+    }
+
+    public static void readConfig(){
         JSONParser jsonParser = new JSONParser();
         try (FileReader reader = new FileReader("src/main/resources/config.json")) {
 
@@ -76,13 +93,21 @@ public class Main {
             adminRoleId = (String) jsonObject.get("AdminPermissionRoleID");
             moderationRoleId = (String) jsonObject.get("ModerationPermissionRoleID");
 
+            notifyUserAtModerationAction = (Boolean) jsonObject.get("NotifyUserAtModerationAction");
+            mutedRoleId = (String) jsonObject.get("MutedRoleID");
+
         } catch (IOException | ParseException e) {
             throw new RuntimeException();
         }
+    }
 
-        HashMap<String, String> values = new HashMap<>();
-        values.put("admin", adminRoleId);
-        values.put("moderation", adminRoleId);
-        return values;
+    public static boolean isNotifyUserAtModerationAction() {
+        readConfig();
+        return notifyUserAtModerationAction;
+    }
+
+    public static String getMutedRoleId() {
+        readConfig();
+        return mutedRoleId;
     }
 }

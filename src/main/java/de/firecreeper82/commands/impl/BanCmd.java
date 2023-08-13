@@ -29,11 +29,25 @@ public class BanCmd extends Command {
 
         String reason = String.join(" ", Arrays.stream(args, 1, args.length).toList());
 
+        EmbedBuilder eb = Util.createEmbed(
+                "You were banned from " + message.getGuild().getName(),
+                Color.GREEN,
+                "You were banned from the server by " + member.getEffectiveName(),
+                "Banned",
+                Instant.now(),
+                null,
+                null
+        );
+
+        eb.addField("Reason", reason, true);
+
+        notifyUser(eb, banMember.getUser());
+
         banMember.ban(0, TimeUnit.SECONDS).queue();
 
-        EmbedBuilder eb = Util.createEmbed(
+        eb = Util.createEmbed(
                 "Banned " + banMember.getEffectiveName(),
-                Color.GREEN,
+                null,
                 "Successfully banned the member " + banMember.getAsMention() + " from the server!",
                 "Banned by " + member.getEffectiveName(),
                 Instant.now(),

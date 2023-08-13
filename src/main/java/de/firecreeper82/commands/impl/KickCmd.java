@@ -1,5 +1,6 @@
 package de.firecreeper82.commands.impl;
 
+import de.firecreeper82.Main;
 import de.firecreeper82.commands.Command;
 import de.firecreeper82.exceptions.exceptions.MemberNotFoundException;
 import de.firecreeper82.permissions.Permission;
@@ -39,9 +40,23 @@ public class KickCmd extends Command {
                 null
         );
 
-        String reason = String.join(" ", Arrays.stream(args, 1, args.length).toList());
+        final String reason = String.join(" ", Arrays.stream(args, 1, args.length).toList());
 
         eb.addField("Reason:", reason, true);
         message.getChannel().sendMessageEmbeds(eb.build()).queue(msg -> msg.delete().queueAfter(5, TimeUnit.SECONDS));
+
+        eb = Util.createEmbed(
+                "You were kicked from " + message.getGuild().getName(),
+                null,
+                "You were kicked from the server by " + member.getEffectiveName(),
+                "Kicked",
+                Instant.now(),
+                null,
+                null
+        );
+
+        eb.addField("Reason", reason, true);
+
+        notifyUser(eb, kickMember.getUser());
     }
 }

@@ -14,6 +14,8 @@ public class ExceptionHandler {
 
         if(e instanceof CustomException)
             title = title.replace("Exception", "");
+        else
+            e.printStackTrace();
 
         EmbedBuilder eb = Util.createEmbed(
                 title,

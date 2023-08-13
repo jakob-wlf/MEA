@@ -1,4 +1,12 @@
 {
   "AdminPermissionRoleID": "1139926650201583757",
-  "ModerationPermissionRoleID": "1139926830959296705"
+  "ModerationPermissionRoleID": "1139926830959296705",
+
+  "MutedRoleID": "1140379543044104312",
+
+  "NotifyUserAtModerationAction": true,
+
+  "BannedLinks": [
+
+  ]
 }

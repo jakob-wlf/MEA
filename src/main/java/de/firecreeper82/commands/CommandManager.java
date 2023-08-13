@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.entities.Role;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class CommandManager {
 
@@ -32,7 +33,9 @@ public class CommandManager {
                 throw new NullPointerException("The user of the command seems to be null.");
 
 
-            String[] args = msg.getContentRaw().substring(commandString.length() + 2).split(" ");
+            String[] args = msg.getContentRaw().substring(commandString.length() + 1).split(" ");
+            if(Objects.equals(args[0], ""))
+                args = Arrays.stream(args, 1, args.length).toArray(String[]::new);
 
             if(args.length < command.getRequiredArgs().size())
                 throw new WrongArgumentsException("Your arguments do not match the syntax ``" + command.getSyntax() + "``.");

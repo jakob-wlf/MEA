@@ -3,11 +3,17 @@ package de.firecreeper82.commands;
 import de.firecreeper82.Main;
 import de.firecreeper82.exceptions.exceptions.InvalidArgumentsException;
 import de.firecreeper82.exceptions.exceptions.MemberNotFoundException;
+import de.firecreeper82.exceptions.exceptions.RoleNoFoundException;
 import de.firecreeper82.exceptions.exceptions.WrongArgumentsException;
 import de.firecreeper82.permissions.Permission;
+import de.firecreeper82.util.Util;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.User;
 
+import java.awt.*;
+import java.time.Instant;
 import java.util.List;
 
 public abstract class Command {
@@ -51,5 +57,13 @@ public abstract class Command {
         return Main.PREFIX + aliases[0] + " [" + String.join("] [", requiredArgs) + "]";
     }
 
-    public abstract void onCommand(String[] args, Message message, Member member) throws MemberNotFoundException, WrongArgumentsException, InvalidArgumentsException, InterruptedException;
+    public abstract void onCommand(String[] args, Message message, Member member) throws MemberNotFoundException, WrongArgumentsException, InvalidArgumentsException, InterruptedException, RoleNoFoundException;
+
+    public void notifyUser(EmbedBuilder eb, User user) {
+        if(Main.isNotifyUserAtModerationAction()) {
+            user.openPrivateChannel().queue(channel -> {
+                channel.sendMessageEmbeds(eb.build()).queue();
+            });
+        }
+    }
 }
