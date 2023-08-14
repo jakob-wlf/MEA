@@ -27,6 +27,7 @@ public class Main {
     public static String TOKEN;
     public static final String PREFIX = "!";
 
+    private static String guildId;
     private static String adminRoleId;
     private static String moderationRoleId;
     private static boolean notifyUserAtModerationAction;
@@ -34,6 +35,7 @@ public class Main {
     private static boolean deleteCommandFeedback;
     private static String mutedRoleId;
     private static long commandFeedbackDeletionDelayInSeconds;
+    private static String loggingChannelID;
 
     public static JDA jda;
     public static CommandManager commandManager;
@@ -160,11 +162,13 @@ public class Main {
             adminRoleId = (String) jsonObject.get("AdminPermissionRoleID");
             moderationRoleId = (String) jsonObject.get("ModerationPermissionRoleID");
 
+            guildId = (String) jsonObject.get("GuildID");
             notifyUserAtModerationAction = (Boolean) jsonObject.get("NotifyUserAtModerationAction");
             deleteCommandFeedback = (Boolean) jsonObject.get("DeleteCommandFeedback");
             logCommandUsage = (Boolean) jsonObject.get("LogCommandUsage");
             mutedRoleId = (String) jsonObject.get("MutedRoleID");
             commandFeedbackDeletionDelayInSeconds = (long) jsonObject.get("CommandFeedbackDeletionDelayInSeconds");
+            loggingChannelID = (String) jsonObject.get("LoggingChannelID");
 
         } catch (IOException | ParseException e) {
             throw new RuntimeException();
@@ -206,5 +210,15 @@ public class Main {
 
     public static long getCommandFeedbackDeletionDelayInSeconds() {
         return commandFeedbackDeletionDelayInSeconds;
+    }
+
+    public static String getGuildId() {
+        readConfig();
+        return guildId;
+    }
+
+    public static String getLoggingChannelID() {
+        readConfig();
+        return loggingChannelID;
     }
 }

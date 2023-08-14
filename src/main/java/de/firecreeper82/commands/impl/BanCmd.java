@@ -3,6 +3,7 @@ package de.firecreeper82.commands.impl;
 import de.firecreeper82.Main;
 import de.firecreeper82.commands.Command;
 import de.firecreeper82.exceptions.exceptions.MemberNotFoundException;
+import de.firecreeper82.logging.Logger;
 import de.firecreeper82.permissions.Permission;
 import de.firecreeper82.util.Util;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -29,6 +30,7 @@ public class BanCmd extends Command {
             throw new MemberNotFoundException("The member you are trying to ban could not be found.");
 
         String reason = String.join(" ", Arrays.stream(args, 1, args.length).toList());
+        sendConfirmEmbed(message, member, banMember, reason);
 
         EmbedBuilder eb = Util.createEmbed(
                 "You were banned from " + message.getGuild().getName(),
@@ -46,20 +48,32 @@ public class BanCmd extends Command {
 
         banMember.ban(0, TimeUnit.SECONDS).queue();
 
-        eb = Util.createEmbed(
+
+    }
+
+    @SafeVarargs
+    public final <T> void sendConfirmEmbed(Message msg, Member cmdUser, T... additionalArgs) {
+        Member banMember = (Member) additionalArgs[0];
+        String reason = (String) additionalArgs[1];
+
+        EmbedBuilder eb = Util.createEmbed(
                 "Banned " + banMember.getEffectiveName(),
                 null,
                 "Successfully banned the member " + banMember.getAsMention() + " from the server!",
-                "Banned by " + member.getEffectiveName(),
+                "Banned by " + cmdUser.getEffectiveName(),
                 Instant.now(),
                 null,
                 null
         );
 
         eb.addField("Reason:", reason, true);
-        message.getChannel().sendMessageEmbeds(eb.build()).queue(msg -> {
+        msg.getChannel().sendMessageEmbeds(eb.build()).queue(message -> {
             if(Main.isDeleteCommandFeedback())
-                msg.delete().queueAfter(Main.getCommandFeedbackDeletionDelayInSeconds(), TimeUnit.SECONDS);
+                message.delete().queueAfter(Main.getCommandFeedbackDeletionDelayInSeconds(), TimeUnit.SECONDS);
         });
+
+        if(Main.isLogCommandUsage()) {
+            Logger.logCommandUsage(eb, this, cmdUser);
+        }
     }
 }

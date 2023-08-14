@@ -4,6 +4,7 @@ import de.firecreeper82.Main;
 import de.firecreeper82.commands.Command;
 import de.firecreeper82.exceptions.exceptions.InvalidArgumentsException;
 import de.firecreeper82.exceptions.exceptions.WrongArgumentsException;
+import de.firecreeper82.logging.Logger;
 import de.firecreeper82.permissions.Permission;
 import de.firecreeper82.util.Util;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -34,6 +35,14 @@ public class ClearCmd extends Command {
         message.getChannel().purgeMessages(messages);
         messageCount--;
 
+        sendConfirmEmbed(message, member, messageCount);
+
+    }
+
+    @SafeVarargs
+    @Override
+    public final <T> void sendConfirmEmbed(Message message, Member member, T... additionalArgs) {
+        int messageCount = (int) additionalArgs[0];
         EmbedBuilder eb = Util.createEmbed(
                 "Messages cleared",
                 Color.GREEN,
@@ -45,5 +54,8 @@ public class ClearCmd extends Command {
         );
 
         message.getChannel().sendMessageEmbeds(eb.build()).queue(msg -> msg.delete().queueAfter(Main.getCommandFeedbackDeletionDelayInSeconds(), TimeUnit.SECONDS));
+        if(Main.isLogCommandUsage()) {
+            Logger.logCommandUsage(eb, this, member);
+        }
     }
 }

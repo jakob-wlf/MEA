@@ -1,4 +1,25 @@
 package de.firecreeper82.logging;
 
+import de.firecreeper82.Main;
+import de.firecreeper82.commands.Command;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+
 public class Logger {
+
+    public static void logCommandUsage(EmbedBuilder eb, Command cmd, Member member) {
+        Guild guild = Main.jda.getGuildById(Main.getGuildId());
+
+        if(guild == null)
+            return;
+
+        TextChannel textChannel = guild.getTextChannelById(Main.getLoggingChannelID());
+        if(textChannel == null)
+            return;
+
+        textChannel.sendMessage("Command ``" + cmd.getAliases()[0] + "`` executed by " + member.getAsMention()).addEmbeds(eb.build()).queue();
+    }
+
 }

@@ -1,4 +1,6 @@
 {
+  "GuildID": "1139918205343760506",
+
   "AdminPermissionRoleID": "1139926650201583757",
   "ModerationPermissionRoleID": "1139926830959296705",
 
@@ -9,7 +11,7 @@
   "DeleteCommandFeedback": true,
   "CommandFeedbackDeletionDelayInSeconds": 7,
 
-  "LoggingChannel": "1140585987068678184",
+  "LoggingChannelID": "1140585987068678184",
 
   "BannedLinks": [
 

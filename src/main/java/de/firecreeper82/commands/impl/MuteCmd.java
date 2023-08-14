@@ -3,6 +3,7 @@ package de.firecreeper82.commands.impl;
 import de.firecreeper82.Main;
 import de.firecreeper82.commands.Command;
 import de.firecreeper82.exceptions.exceptions.*;
+import de.firecreeper82.logging.Logger;
 import de.firecreeper82.permissions.Permission;
 import de.firecreeper82.util.Util;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -61,29 +62,10 @@ public class MuteCmd extends Command {
 
         }
 
-        String embedDescription = "Successfully muted the member " + muteMember.getAsMention() + "!\n";
-        if(time != 0)
-            embedDescription += "He will be unmuted " + TimeFormat.RELATIVE.format(System.currentTimeMillis() + time);
+        final String reason = String.join(" ", Arrays.stream(args, 2, args.length).toList());
+        sendConfirmEmbed(message, member, time, muteMember, reason);
 
         EmbedBuilder eb = Util.createEmbed(
-                "Muted " + muteMember.getEffectiveName(),
-                Color.GREEN,
-                embedDescription,
-                "Muted by " + member.getEffectiveName(),
-                Instant.now(),
-                null,
-                null
-        );
-
-        final String reason = String.join(" ", Arrays.stream(args, 2, args.length).toList());
-
-        eb.addField("Reason:", reason, true);
-        message.getChannel().sendMessageEmbeds(eb.build()).queue(msg -> {
-            if(Main.isDeleteCommandFeedback())
-                msg.delete().queueAfter(Main.getCommandFeedbackDeletionDelayInSeconds(), TimeUnit.SECONDS);
-        });
-
-        eb = Util.createEmbed(
                 "You were muted in " + message.getGuild().getName(),
                 null,
                 "You were muted in the server by " + member.getEffectiveName(),
@@ -96,6 +78,39 @@ public class MuteCmd extends Command {
         eb.addField("Reason", reason, true);
 
         notifyUser(eb, muteMember.getUser());
+    }
+
+
+    @SafeVarargs
+    @Override
+    public final <T> void sendConfirmEmbed(Message msg, Member cmdUser, T... additionalArgs) {
+        long time = (long) additionalArgs[0];
+        Member muteMember = (Member) additionalArgs[1];
+        String reason = (String) additionalArgs[2];
+
+        String embedDescription = "Successfully muted the member " + muteMember.getAsMention() + "!\n";
+        if(time != 0)
+            embedDescription += "He will be unmuted " + TimeFormat.RELATIVE.format(System.currentTimeMillis() + time);
+
+        EmbedBuilder eb = Util.createEmbed(
+                "Muted " + muteMember.getEffectiveName(),
+                Color.GREEN,
+                embedDescription,
+                "Muted by " + cmdUser.getEffectiveName(),
+                Instant.now(),
+                null,
+                null
+        );
+
+        eb.addField("Reason:", reason, true);
+        msg.getChannel().sendMessageEmbeds(eb.build()).queue(message -> {
+            if(Main.isDeleteCommandFeedback())
+                message.delete().queueAfter(Main.getCommandFeedbackDeletionDelayInSeconds(), TimeUnit.SECONDS);
+        });
+
+        if(Main.isLogCommandUsage()) {
+            Logger.logCommandUsage(eb, this, cmdUser);
+        }
     }
 
     private long checkForValidTime(String time) throws WrongArgumentsException {

@@ -3,14 +3,11 @@ package de.firecreeper82.commands;
 import de.firecreeper82.Main;
 import de.firecreeper82.exceptions.exceptions.*;
 import de.firecreeper82.permissions.Permission;
-import de.firecreeper82.util.Util;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 
-import java.awt.*;
-import java.time.Instant;
 import java.util.List;
 
 public abstract class Command {
@@ -56,10 +53,17 @@ public abstract class Command {
 
     public abstract void onCommand(String[] args, Message message, Member member) throws MemberNotFoundException, WrongArgumentsException, InvalidArgumentsException, InterruptedException, RoleNoFoundException, MemberIsAlreadyMutedException;
 
+    public <T> void sendConfirmEmbed(Message message, Member member, T... additionalArgs) {
+
+    }
+
     public void notifyUser(EmbedBuilder eb, User user) {
-        if(Main.isNotifyUserAtModerationAction()) {
+        if (Main.isNotifyUserAtModerationAction()) {
             user.openPrivateChannel().queue(channel -> {
-                channel.sendMessageEmbeds(eb.build()).queue();
+                try {
+                    channel.sendMessageEmbeds(eb.build()).queue();
+                } catch (Exception ignored) {
+                }
             });
         }
     }
