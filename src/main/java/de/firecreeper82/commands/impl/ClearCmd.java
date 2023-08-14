@@ -1,5 +1,6 @@
 package de.firecreeper82.commands.impl;
 
+import de.firecreeper82.Main;
 import de.firecreeper82.commands.Command;
 import de.firecreeper82.exceptions.exceptions.InvalidArgumentsException;
 import de.firecreeper82.exceptions.exceptions.WrongArgumentsException;
@@ -20,9 +21,9 @@ public class ClearCmd extends Command {
     }
 
     @Override
-    public void onCommand(String[] args, Message message, Member member) throws InvalidArgumentsException, InterruptedException {
+    public void onCommand(String[] args, Message message, Member member) throws InvalidArgumentsException {
         if(!Util.isInt(args[0]))
-            throw new InvalidArgumentsException("Your arguments do not match the syntax ``" + getSyntax() + "``.");
+            throw new InvalidArgumentsException("The provided arguments do not match the syntax ``" + getSyntax() + "``.");
 
         int messageCount = Integer.parseInt(args[0]);
         if (messageCount < 1 || messageCount > 99)
@@ -43,6 +44,6 @@ public class ClearCmd extends Command {
                 null
         );
 
-        message.getChannel().sendMessageEmbeds(eb.build()).queue(msg -> msg.delete().queueAfter(5, TimeUnit.SECONDS));
+        message.getChannel().sendMessageEmbeds(eb.build()).queue(msg -> msg.delete().queueAfter(Main.getCommandFeedbackDeletionDelayInSeconds(), TimeUnit.SECONDS));
     }
 }

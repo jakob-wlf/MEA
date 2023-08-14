@@ -5,6 +5,11 @@
   "MutedRoleID": "1140379543044104312",
 
   "NotifyUserAtModerationAction": true,
+  "LogCommandUsage": true,
+  "DeleteCommandFeedback": true,
+  "CommandFeedbackDeletionDelayInSeconds": 7,
+
+  "LoggingChannel": "1140585987068678184",
 
   "BannedLinks": [
 

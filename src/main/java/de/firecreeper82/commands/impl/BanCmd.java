@@ -1,5 +1,6 @@
 package de.firecreeper82.commands.impl;
 
+import de.firecreeper82.Main;
 import de.firecreeper82.commands.Command;
 import de.firecreeper82.exceptions.exceptions.MemberNotFoundException;
 import de.firecreeper82.permissions.Permission;
@@ -56,6 +57,9 @@ public class BanCmd extends Command {
         );
 
         eb.addField("Reason:", reason, true);
-        message.getChannel().sendMessageEmbeds(eb.build()).queue(msg -> msg.delete().queueAfter(5, TimeUnit.SECONDS));
+        message.getChannel().sendMessageEmbeds(eb.build()).queue(msg -> {
+            if(Main.isDeleteCommandFeedback())
+                msg.delete().queueAfter(Main.getCommandFeedbackDeletionDelayInSeconds(), TimeUnit.SECONDS);
+        });
     }
 }

@@ -43,7 +43,10 @@ public class KickCmd extends Command {
         final String reason = String.join(" ", Arrays.stream(args, 1, args.length).toList());
 
         eb.addField("Reason:", reason, true);
-        message.getChannel().sendMessageEmbeds(eb.build()).queue(msg -> msg.delete().queueAfter(5, TimeUnit.SECONDS));
+        message.getChannel().sendMessageEmbeds(eb.build()).queue(msg -> {
+            if(Main.isDeleteCommandFeedback())
+                msg.delete().queueAfter(Main.getCommandFeedbackDeletionDelayInSeconds(), TimeUnit.SECONDS);
+        });
 
         eb = Util.createEmbed(
                 "You were kicked from " + message.getGuild().getName(),

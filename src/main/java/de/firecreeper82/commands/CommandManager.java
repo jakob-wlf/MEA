@@ -35,7 +35,7 @@ public class CommandManager {
 
 
             String[] args = msg.getContentRaw().substring(commandString.length() + 1).split(" ");
-            if(Objects.equals(args[0], ""))
+            if(Objects.equals(args[0], "") || Objects.equals(args[0], " "))
                 args = Arrays.stream(args, 1, args.length).toArray(String[]::new);
 
             if(args.length < command.getRequiredArgs().size())

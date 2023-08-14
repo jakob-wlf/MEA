@@ -1,10 +1,7 @@
 package de.firecreeper82.commands;
 
 import de.firecreeper82.Main;
-import de.firecreeper82.exceptions.exceptions.InvalidArgumentsException;
-import de.firecreeper82.exceptions.exceptions.MemberNotFoundException;
-import de.firecreeper82.exceptions.exceptions.RoleNoFoundException;
-import de.firecreeper82.exceptions.exceptions.WrongArgumentsException;
+import de.firecreeper82.exceptions.exceptions.*;
 import de.firecreeper82.permissions.Permission;
 import de.firecreeper82.util.Util;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -57,7 +54,7 @@ public abstract class Command {
         return Main.PREFIX + aliases[0] + " [" + String.join("] [", requiredArgs) + "]";
     }
 
-    public abstract void onCommand(String[] args, Message message, Member member) throws MemberNotFoundException, WrongArgumentsException, InvalidArgumentsException, InterruptedException, RoleNoFoundException;
+    public abstract void onCommand(String[] args, Message message, Member member) throws MemberNotFoundException, WrongArgumentsException, InvalidArgumentsException, InterruptedException, RoleNoFoundException, MemberIsAlreadyMutedException;
 
     public void notifyUser(EmbedBuilder eb, User user) {
         if(Main.isNotifyUserAtModerationAction()) {
