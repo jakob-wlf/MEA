@@ -55,7 +55,7 @@ public class ClearCmd extends Command {
 
         message.getChannel().sendMessageEmbeds(eb.build()).queue(msg -> msg.delete().queueAfter(Main.getCommandFeedbackDeletionDelayInSeconds(), TimeUnit.SECONDS));
         if(Main.isLogCommandUsage()) {
-            Logger.logCommandUsage(eb, this, member);
+            Logger.logCommandUsage(eb, this, member, message);
         }
     }
 }

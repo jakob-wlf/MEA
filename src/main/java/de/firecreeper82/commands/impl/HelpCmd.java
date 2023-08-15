@@ -27,7 +27,7 @@ public class HelpCmd extends Command {
                 "Help",
                 Color.blue,
                 "Here is a list of all commands",
-                "requested by " + member.getEffectiveName(),
+                "Requested by " + member.getEffectiveName(),
                 Instant.now(),
                 null,
                 null
@@ -35,10 +35,11 @@ public class HelpCmd extends Command {
 
         for(Command cmd : Main.commandManager.getCommands()) {
             eb.addField(
-                    cmd.getAliases()[0],
-                    "Aliases: ``" + String.join(", ", cmd.getAliases()) + "``\n" +
-                          "Syntax: ``" + cmd.getSyntax()  + "``\n" +
-                          "Description: ``" + cmd.getDescription() + "``",
+                    Util.capitalize(cmd.getAliases()[0]),
+                    "Aliases: `" + String.join(", ", cmd.getAliases()) + "`\n" +
+                          "Syntax: `" + cmd.getSyntax()  + "`\n" +
+                          "Description: `" + cmd.getDescription() + "`\n\n" +
+                          "**--------------------------------------------------------------------**\n",
                     false
             );
         }

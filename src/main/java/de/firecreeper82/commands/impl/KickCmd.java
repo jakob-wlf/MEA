@@ -70,7 +70,7 @@ public class KickCmd extends Command {
         });
 
         if(Main.isLogCommandUsage()) {
-            Logger.logCommandUsage(eb, this, cmdUser);
+            Logger.logCommandUsage(eb, this, cmdUser, msg);
         }
     }
 }

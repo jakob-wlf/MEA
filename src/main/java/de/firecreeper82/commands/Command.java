@@ -48,10 +48,13 @@ public abstract class Command {
     }
 
     private String createSyntax() {
-        return Main.PREFIX + aliases[0] + " [" + String.join("] [", requiredArgs) + "]";
+        if(!requiredArgs.isEmpty())
+            return Main.PREFIX + aliases[0] + " [" + String.join("] [", requiredArgs) + "]";
+        else
+            return Main.PREFIX + aliases[0];
     }
 
-    public abstract void onCommand(String[] args, Message message, Member member) throws MemberNotFoundException, WrongArgumentsException, InvalidArgumentsException, InterruptedException, RoleNoFoundException, MemberIsAlreadyMutedException;
+    public abstract void onCommand(String[] args, Message message, Member member) throws MemberNotFoundException, WrongArgumentsException, InvalidArgumentsException, InterruptedException, RoleNoFoundException, MemberIsAlreadyMutedException, MemberIsNotMutedException;
 
     public <T> void sendConfirmEmbed(Message message, Member member, T... additionalArgs) {
 

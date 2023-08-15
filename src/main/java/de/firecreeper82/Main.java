@@ -36,6 +36,7 @@ public class Main {
     private static String mutedRoleId;
     private static long commandFeedbackDeletionDelayInSeconds;
     private static String loggingChannelID;
+    private static JSONArray bannedLinks;
 
     public static JDA jda;
     public static CommandManager commandManager;
@@ -82,6 +83,12 @@ public class Main {
                 new String[]{"help"},
                 "List all commands",
                 List.of(),
+                Permission.MEMBER
+        ));
+        commandManager.addCommand(new UnMuteCmd(
+                new String[]{"unmute"},
+                "Unmute a member",
+                List.of("User"),
                 Permission.MEMBER
         ));
 
@@ -169,6 +176,7 @@ public class Main {
             mutedRoleId = (String) jsonObject.get("MutedRoleID");
             commandFeedbackDeletionDelayInSeconds = (long) jsonObject.get("CommandFeedbackDeletionDelayInSeconds");
             loggingChannelID = (String) jsonObject.get("LoggingChannelID");
+            bannedLinks = (JSONArray) jsonObject.get("BannedLinks");
 
         } catch (IOException | ParseException e) {
             throw new RuntimeException();
@@ -220,5 +228,10 @@ public class Main {
     public static String getLoggingChannelID() {
         readConfig();
         return loggingChannelID;
+    }
+
+    public static JSONArray getBannedLinks() {
+        readConfig();
+        return bannedLinks;
     }
 }
