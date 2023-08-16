@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -59,6 +60,11 @@ public class UnMuteCmd extends Command {
         );
 
         notifyUser(eb, muteMember.getUser());
+    }
+
+    @Override
+    public void onSlashCommand(SlashCommandInteractionEvent event) {
+
     }
 
     @SafeVarargs

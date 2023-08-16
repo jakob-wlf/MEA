@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.utils.TimeFormat;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -78,6 +79,11 @@ public class MuteCmd extends Command {
         eb.addField("Reason", reason, true);
 
         notifyUser(eb, muteMember.getUser());
+    }
+
+    @Override
+    public void onSlashCommand(SlashCommandInteractionEvent event) {
+
     }
 
 

@@ -6,6 +6,7 @@ import de.firecreeper82.util.Util;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
@@ -16,7 +17,9 @@ public class MessageListener extends ListenerAdapter {
 
     @Override
     public void onMessageReceived(MessageReceivedEvent e) {
-        //TODO implement slash command logic
+        if(e.getChannel() instanceof PrivateChannel)
+            return;
+
         if(e.getMessage().getContentRaw().startsWith(Main.PREFIX))
             Main.commandManager.onCommand(e.getMessage());
 

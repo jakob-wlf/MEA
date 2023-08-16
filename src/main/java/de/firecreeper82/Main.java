@@ -4,6 +4,7 @@ import de.firecreeper82.commands.CommandManager;
 import de.firecreeper82.commands.impl.*;
 import de.firecreeper82.listeners.MessageListener;
 import de.firecreeper82.listeners.ReadyListener;
+import de.firecreeper82.listeners.SlashListener;
 import de.firecreeper82.permissions.Permission;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -11,6 +12,8 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import org.json.simple.JSONArray;
@@ -52,6 +55,7 @@ public class Main {
                 .setMemberCachePolicy(MemberCachePolicy.ALL)
                 .addEventListeners(new MessageListener())
                 .addEventListeners(new ReadyListener())
+                .addEventListeners(new SlashListener())
                 .build();
 
         commandManager = new CommandManager();
@@ -75,7 +79,7 @@ public class Main {
         ));
         commandManager.addCommand(new MuteCmd(
                 new String[]{"mute", "m"},
-                "Ban a user from the server",
+                "Mute a user",
                 List.of("User", "Mute Duration (1m/1h/1d/1w/infinite)", "Reason"),
                 Permission.ADMIN
         ));

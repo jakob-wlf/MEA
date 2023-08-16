@@ -7,8 +7,10 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public abstract class Command {
 
@@ -56,6 +58,8 @@ public abstract class Command {
 
     public abstract void onCommand(String[] args, Message message, Member member) throws MemberNotFoundException, WrongArgumentsException, InvalidArgumentsException, InterruptedException, RoleNoFoundException, MemberIsAlreadyMutedException, MemberIsNotMutedException;
 
+    public abstract void onSlashCommand(SlashCommandInteractionEvent event) throws MemberNotFoundException;
+
     public <T> void sendConfirmEmbed(Message message, Member member, T... additionalArgs) {
 
     }
@@ -65,8 +69,7 @@ public abstract class Command {
             user.openPrivateChannel().queue(channel -> {
                 try {
                     channel.sendMessageEmbeds(eb.build()).queue();
-                } catch (Exception ignored) {
-                }
+                } catch (Exception ignored) {}
             });
         }
     }

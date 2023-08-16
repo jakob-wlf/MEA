@@ -11,6 +11,7 @@ import de.firecreeper82.util.Util;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 import java.awt.*;
 import java.time.Instant;
@@ -45,5 +46,10 @@ public class HelpCmd extends Command {
         }
 
         message.replyEmbeds(eb.build()).queue();
+    }
+
+    @Override
+    public void onSlashCommand(SlashCommandInteractionEvent event) {
+
     }
 }

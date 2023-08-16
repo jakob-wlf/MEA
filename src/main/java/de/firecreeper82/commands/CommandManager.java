@@ -7,6 +7,7 @@ import de.firecreeper82.exceptions.exceptions.WrongPermissionsException;
 import de.firecreeper82.permissions.Permission;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,6 +20,22 @@ public class CommandManager {
 
     public CommandManager() {
         commands = new ArrayList<>();
+    }
+
+    public void onSlashCommand(SlashCommandInteractionEvent event) {
+        Command command = commands.stream()
+                .filter(cmd -> Arrays.asList(cmd.aliases).contains(event.getName()))
+                .findFirst().orElse(null);
+
+        if(command == null)
+            return;
+
+        try {
+            command.onSlashCommand(event);
+        }
+        catch (Exception e) {
+            ExceptionHandler.handleSlashCommandException(event, e);
+        }
     }
 
     public void onCommand(Message msg) {
