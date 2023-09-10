@@ -46,15 +46,7 @@ public class KickCmd extends Command {
         final String reason = String.join(" ", Arrays.stream(args, 1, args.length).toList());
         sendConfirmEmbed(message, member, kickMember, reason);
 
-        EmbedBuilder eb = Util.createEmbed(
-                "You were kicked from " + message.getGuild().getName(),
-                null,
-                "You were kicked from the server by " + member.getEffectiveName(),
-                "Kicked",
-                Instant.now(),
-                null,
-                null
-        );
+        EmbedBuilder eb = getNotifyEmbed(member, reason);
 
         eb.addField("Reason", reason, true);
 
@@ -64,6 +56,7 @@ public class KickCmd extends Command {
     @Override
     public void onSlashCommand(SlashCommandInteractionEvent event) throws MemberNotFoundException {
         Member kickMember = event.getOption("user", OptionMapping::getAsMember);
+        final String reason = event.getOption("reason", OptionMapping::getAsString);
 
         if(event.getMember() == null)
             return;
@@ -73,14 +66,25 @@ public class KickCmd extends Command {
 
         kickMember.kick().queue();
 
-        final String reason = event.getOption("reason", OptionMapping::getAsString);
         EmbedBuilder eb = createConfirmEmbed(event.getMember(), kickMember, reason);
         event.replyEmbeds(eb.build()).setEphemeral(true).queue();
 
+        if(Main.isLogCommandUsage()) {
+            Logger.logCommandUsage(eb, this, event.getMember(), event.getChannel());
+        }
+
+        eb = getNotifyEmbed(event.getMember(), reason);
+
+        notifyUser(eb, kickMember.getUser());
+    }
+
+    @NotNull
+    private static EmbedBuilder getNotifyEmbed(Member member, String reason) {
+        EmbedBuilder eb;
         eb = Util.createEmbed(
-                "You were kicked from " + Objects.requireNonNull(event.getGuild()).getName(),
+                "You were kicked from " + Objects.requireNonNull(member.getGuild()).getName(),
                 null,
-                "You were kicked from the server by " + event.getUser().getEffectiveName(),
+                "You were kicked from the server by " + member.getUser().getEffectiveName(),
                 "Kicked",
                 Instant.now(),
                 null,
@@ -90,8 +94,9 @@ public class KickCmd extends Command {
         if(reason != null)
             eb.addField("Reason", reason, true);
 
-        notifyUser(eb, kickMember.getUser());
+        return eb;
     }
+
 
     @SafeVarargs
     public final <T> void sendConfirmEmbed(Message msg, Member cmdUser, T... additionalArgs) {
@@ -105,7 +110,7 @@ public class KickCmd extends Command {
         });
 
         if(Main.isLogCommandUsage()) {
-            Logger.logCommandUsage(eb, this, cmdUser, msg);
+            Logger.logCommandUsage(eb, this, cmdUser, msg.getChannel());
         }
     }
 

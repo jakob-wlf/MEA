@@ -74,7 +74,7 @@ public class UnMuteCmd extends Command {
         EmbedBuilder eb = Util.createEmbed(
                 "Unmuted " + muteMember.getEffectiveName(),
                 Color.GREEN,
-                "Successfully unmuted " + member.getAsMention() + "!",
+                "Successfully unmuted " + muteMember.getAsMention() + "!",
                 "Unmuted by " + member.getEffectiveName(),
                 Instant.now(),
                 null,
@@ -83,7 +83,7 @@ public class UnMuteCmd extends Command {
 
         message.getChannel().sendMessageEmbeds(eb.build()).queue(msg -> msg.delete().queueAfter(Main.getCommandFeedbackDeletionDelayInSeconds(), TimeUnit.SECONDS));
         if(Main.isLogCommandUsage()) {
-            Logger.logCommandUsage(eb, this, member, message);
+            Logger.logCommandUsage(eb, this, member, message.getChannel());
         }
     }
 

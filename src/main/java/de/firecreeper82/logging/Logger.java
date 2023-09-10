@@ -6,11 +6,13 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.channel.Channel;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 public class Logger {
 
-    public static void logCommandUsage(EmbedBuilder eb, Command cmd, Member member, Message msg) {
+    public static void logCommandUsage(EmbedBuilder eb, Command cmd, Member member, Channel channel) {
         Guild guild = Main.jda.getGuildById(Main.getGuildId());
 
         if(guild == null)
@@ -20,7 +22,7 @@ public class Logger {
         if(textChannel == null)
             return;
 
-        textChannel.sendMessage("Command ``" + cmd.getAliases()[0] + "`` executed by " + member.getAsMention() + " in channel " + msg.getChannel().getAsMention()).addEmbeds(eb.build()).queue();
+        textChannel.sendMessage("Command ``" + cmd.getAliases()[0] + "`` executed by " + member.getAsMention() + " in channel " + channel.getAsMention()).addEmbeds(eb.build()).queue();
     }
 
     public static void logUserWarningBecauseOfMessage(EmbedBuilder eb, Member member, Message msg) {

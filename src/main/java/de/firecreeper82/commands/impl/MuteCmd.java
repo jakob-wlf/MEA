@@ -115,7 +115,7 @@ public class MuteCmd extends Command {
         });
 
         if(Main.isLogCommandUsage()) {
-            Logger.logCommandUsage(eb, this, cmdUser, msg);
+            Logger.logCommandUsage(eb, this, cmdUser, msg.getChannel());
         }
     }
 

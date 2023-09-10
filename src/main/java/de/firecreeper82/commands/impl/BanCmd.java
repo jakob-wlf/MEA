@@ -10,6 +10,10 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.time.Instant;
@@ -21,6 +25,12 @@ public class BanCmd extends Command {
 
     public BanCmd(String[] aliases, String description, List<String> requiredArgs, Permission requiredPerm) {
         super(aliases, description, requiredArgs, requiredPerm);
+
+        Main.jda.updateCommands().addCommands(
+                Commands.slash(aliases[0], description)
+                        .addOption(OptionType.USER, "user", "The user to ban", true)
+                        .addOption(OptionType.STRING, "reason", "The reason for the ban", true)
+        ).queue();
     }
 
     @Override
@@ -33,8 +43,39 @@ public class BanCmd extends Command {
         String reason = String.join(" ", Arrays.stream(args, 1, args.length).toList());
         sendConfirmEmbed(message, member, banMember, reason);
 
+        EmbedBuilder eb = getNotifyEmbed(member, reason);
+
+        notifyUser(eb, banMember.getUser());
+
+        banMember.ban(0, TimeUnit.SECONDS).queue();
+
+    }
+
+    @Override
+    public void onSlashCommand(SlashCommandInteractionEvent event) throws MemberNotFoundException {
+        Member banMember = event.getOption("user", OptionMapping::getAsMember);
+        String reason = event.getOption("reason", OptionMapping::getAsString);
+
+        if(event.getMember() == null)
+            return;
+
+        if (banMember == null)
+            throw new MemberNotFoundException("The member you are trying to ban could not be found.");
+
+        EmbedBuilder eb = createConfirmEmbed(event.getMember(), banMember, reason);
+        event.replyEmbeds(eb.build()).setEphemeral(true).queue();
+
+        eb = getNotifyEmbed(event.getMember(), reason);
+
+        notifyUser(eb, banMember.getUser());
+
+        banMember.ban(0, TimeUnit.SECONDS).queue();
+    }
+
+    @NotNull
+    private static EmbedBuilder getNotifyEmbed(Member member, String reason) {
         EmbedBuilder eb = Util.createEmbed(
-                "You were banned from " + message.getGuild().getName(),
+                "You were banned from " + member.getGuild().getName(),
                 Color.GREEN,
                 "You were banned from the server by " + member.getEffectiveName(),
                 "Banned",
@@ -44,17 +85,7 @@ public class BanCmd extends Command {
         );
 
         eb.addField("Reason", reason, true);
-
-        notifyUser(eb, banMember.getUser());
-
-        banMember.ban(0, TimeUnit.SECONDS).queue();
-
-
-    }
-
-    @Override
-    public void onSlashCommand(SlashCommandInteractionEvent event) {
-
+        return eb;
     }
 
     @SafeVarargs
@@ -62,6 +93,19 @@ public class BanCmd extends Command {
         Member banMember = (Member) additionalArgs[0];
         String reason = (String) additionalArgs[1];
 
+        EmbedBuilder eb = createConfirmEmbed(cmdUser, banMember, reason);
+        msg.getChannel().sendMessageEmbeds(eb.build()).queue(message -> {
+            if(Main.isDeleteCommandFeedback())
+                message.delete().queueAfter(Main.getCommandFeedbackDeletionDelayInSeconds(), TimeUnit.SECONDS);
+        });
+
+        if(Main.isLogCommandUsage()) {
+            Logger.logCommandUsage(eb, this, cmdUser, msg.getChannel());
+        }
+    }
+
+    @NotNull
+    private static EmbedBuilder createConfirmEmbed(Member cmdUser, Member banMember, String reason) {
         EmbedBuilder eb = Util.createEmbed(
                 "Banned " + banMember.getEffectiveName(),
                 null,
@@ -73,13 +117,6 @@ public class BanCmd extends Command {
         );
 
         eb.addField("Reason:", reason, true);
-        msg.getChannel().sendMessageEmbeds(eb.build()).queue(message -> {
-            if(Main.isDeleteCommandFeedback())
-                message.delete().queueAfter(Main.getCommandFeedbackDeletionDelayInSeconds(), TimeUnit.SECONDS);
-        });
-
-        if(Main.isLogCommandUsage()) {
-            Logger.logCommandUsage(eb, this, cmdUser, msg);
-        }
+        return eb;
     }
 }
