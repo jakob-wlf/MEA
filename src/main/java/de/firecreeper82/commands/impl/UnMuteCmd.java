@@ -12,6 +12,10 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -27,6 +31,11 @@ public class UnMuteCmd extends Command {
 
     public UnMuteCmd(String[] aliases, String description, List<String> requiredArgs, Permission requiredPerm) {
         super(aliases, description, requiredArgs, requiredPerm);
+
+        Main.jda.updateCommands().addCommands(
+                Commands.slash(aliases[0], description)
+                        .addOption(OptionType.USER, "user", "The user to unmute", true)
+        ).queue();
     }
 
     @Override
@@ -63,14 +72,55 @@ public class UnMuteCmd extends Command {
     }
 
     @Override
-    public void onSlashCommand(SlashCommandInteractionEvent event) {
+    public void onSlashCommand(SlashCommandInteractionEvent event) throws MemberNotFoundException, RoleNoFoundException, MemberIsNotMutedException {
+        Member muteMember = event.getOption("user", OptionMapping::getAsMember);
 
+        if(event.getMember() == null)
+            return;
+
+        if (muteMember == null)
+            throw new MemberNotFoundException("The member you are trying to unmute could not be found.");
+
+        Role muteRole = event.getGuild().getRoleById(getMutedRoleId());
+        if (muteRole == null)
+            throw new RoleNoFoundException("The muting role could not be found. Check the config to confirm the role id.");
+
+        if(!muteMember.getRoles().contains(muteRole))
+            throw new MemberIsNotMutedException("The member you are trying to unmute is not muted.");
+
+        event.getGuild().removeRoleFromMember(muteMember, muteRole).queue();
+
+        removeFromJsonFile(muteMember);
+
+        event.replyEmbeds(createConfirmEmbed(event.getMember(), muteMember).build()).setEphemeral(true).queue();
+
+        EmbedBuilder eb = Util.createEmbed(
+                "You were unmuted in " + event.getGuild().getName(),
+                null,
+                "You were unmuted in the server by " + event.getMember().getEffectiveName(),
+                "Unmuted",
+                Instant.now(),
+                null,
+                null
+        );
+
+        notifyUser(eb, muteMember.getUser());
     }
 
     @SafeVarargs
     @Override
     public final <T> void sendConfirmEmbed(Message message, Member member, T... additionalArgs) {
         Member muteMember = (Member) additionalArgs[0];
+        EmbedBuilder eb = createConfirmEmbed(member, muteMember);
+
+        message.getChannel().sendMessageEmbeds(eb.build()).queue(msg -> msg.delete().queueAfter(Main.getCommandFeedbackDeletionDelayInSeconds(), TimeUnit.SECONDS));
+        if(Main.isLogCommandUsage()) {
+            Logger.logCommandUsage(eb, this, member, message.getChannel());
+        }
+    }
+
+    @NotNull
+    private static EmbedBuilder createConfirmEmbed(Member member, Member muteMember) {
         EmbedBuilder eb = Util.createEmbed(
                 "Unmuted " + muteMember.getEffectiveName(),
                 Color.GREEN,
@@ -80,11 +130,7 @@ public class UnMuteCmd extends Command {
                 null,
                 null
         );
-
-        message.getChannel().sendMessageEmbeds(eb.build()).queue(msg -> msg.delete().queueAfter(Main.getCommandFeedbackDeletionDelayInSeconds(), TimeUnit.SECONDS));
-        if(Main.isLogCommandUsage()) {
-            Logger.logCommandUsage(eb, this, member, message.getChannel());
-        }
+        return eb;
     }
 
     @SuppressWarnings("unchecked")

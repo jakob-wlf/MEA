@@ -11,7 +11,11 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.utils.TimeFormat;
+import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -19,11 +23,19 @@ import java.awt.*;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 public class MuteCmd extends Command {
     public MuteCmd(String[] aliases, String description, List<String> requiredArgs, Permission requiredPerm) {
         super(aliases, description, requiredArgs, requiredPerm);
+
+        Main.jda.updateCommands().addCommands(
+                Commands.slash(aliases[0], description)
+                        .addOption(OptionType.USER, "user", "The user to mute", true)
+                        .addOption(OptionType.STRING, "time", "The time for the mute (1m/1h/1d/1w/infinite)")
+                        .addOption(OptionType.STRING, "reason", "The reason for the mute", true)
+        ).queue();
     }
 
     @SuppressWarnings("unchecked")
@@ -82,8 +94,64 @@ public class MuteCmd extends Command {
     }
 
     @Override
-    public void onSlashCommand(SlashCommandInteractionEvent event) {
+    public void onSlashCommand(SlashCommandInteractionEvent event) throws MemberNotFoundException, RoleNoFoundException, MemberIsAlreadyMutedException, WrongArgumentsException {
+        Member muteMember = event.getOption("user", OptionMapping::getAsMember);
 
+        if(event.getMember() == null)
+            return;
+
+        if (muteMember == null)
+            throw new MemberNotFoundException("The member you are trying to mute could not be found.");
+
+        Role muteRole = muteMember.getGuild().getRoleById(Main.getMutedRoleId());
+        if (muteRole == null)
+            throw new RoleNoFoundException("The muting role could not be found. Check the config to confirm the role id.");
+
+        for(Object object : Main.readMutedMembers()) {
+            if(!(object instanceof JSONObject jObject))
+                continue;
+            if(jObject.get("MemberID").equals(muteMember.getId()))
+                throw new MemberIsAlreadyMutedException("The member you are trying to mute is already muted.");
+        }
+
+        muteMember.getGuild().addRoleToMember(muteMember, muteRole).queue();
+
+        long time = checkForValidTime(Objects.requireNonNull(event.getOption("time", OptionMapping::getAsString)));
+        if(time != 0) {
+            long finishTime = System.currentTimeMillis() + time;
+
+            JSONObject object = new JSONObject();
+            object.put("FinishedTime", finishTime);
+            object.put("GuildID", muteMember.getGuild().getId());
+            object.put("MemberID", muteMember.getId());
+
+            JSONArray objects = Main.readMutedMembers();
+            objects.add(object);
+
+            Main.writeMutedMembersToJsonFile(objects);
+
+        }
+
+        String embedDescription = "Successfully muted the member " + muteMember.getAsMention() + "!\n";
+        if(time != 0)
+            embedDescription += "He will be unmuted " + TimeFormat.RELATIVE.format(System.currentTimeMillis() + time);
+
+        final String reason = event.getOption("reason", OptionMapping::getAsString);
+        event.replyEmbeds(createConfirmEmbed(event.getMember(), muteMember, embedDescription, reason).build()).setEphemeral(true).queue();
+
+        EmbedBuilder eb = Util.createEmbed(
+                "You were muted in " + event.getGuild().getName(),
+                null,
+                "You were muted in the server by " + event.getMember().getEffectiveName(),
+                "Muted",
+                Instant.now(),
+                null,
+                null
+        );
+
+        eb.addField("Reason", reason, true);
+
+        notifyUser(eb, muteMember.getUser());
     }
 
 
@@ -98,6 +166,19 @@ public class MuteCmd extends Command {
         if(time != 0)
             embedDescription += "He will be unmuted " + TimeFormat.RELATIVE.format(System.currentTimeMillis() + time);
 
+        EmbedBuilder eb = createConfirmEmbed(cmdUser, muteMember, embedDescription, reason);
+        msg.getChannel().sendMessageEmbeds(eb.build()).queue(message -> {
+            if(Main.isDeleteCommandFeedback())
+                message.delete().queueAfter(Main.getCommandFeedbackDeletionDelayInSeconds(), TimeUnit.SECONDS);
+        });
+
+        if(Main.isLogCommandUsage()) {
+            Logger.logCommandUsage(eb, this, cmdUser, msg.getChannel());
+        }
+    }
+
+    @NotNull
+    private static EmbedBuilder createConfirmEmbed(Member cmdUser, Member muteMember, String embedDescription, String reason) {
         EmbedBuilder eb = Util.createEmbed(
                 "Muted " + muteMember.getEffectiveName(),
                 Color.GREEN,
@@ -109,14 +190,7 @@ public class MuteCmd extends Command {
         );
 
         eb.addField("Reason:", reason, true);
-        msg.getChannel().sendMessageEmbeds(eb.build()).queue(message -> {
-            if(Main.isDeleteCommandFeedback())
-                message.delete().queueAfter(Main.getCommandFeedbackDeletionDelayInSeconds(), TimeUnit.SECONDS);
-        });
-
-        if(Main.isLogCommandUsage()) {
-            Logger.logCommandUsage(eb, this, cmdUser, msg.getChannel());
-        }
+        return eb;
     }
 
     private long checkForValidTime(String time) throws WrongArgumentsException {
