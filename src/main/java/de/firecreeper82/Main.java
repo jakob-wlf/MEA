@@ -31,6 +31,7 @@ public class Main {
     private static long commandFeedbackDeletionDelayInSeconds;
     private static String loggingChannelID;
     private static JSONArray bannedLinks;
+    private static long xpPerMessage;
 
     public static JDA jda;
     public static CommandManager commandManager;
@@ -90,6 +91,32 @@ public class Main {
         readConfig();
     }
 
+    @SuppressWarnings("unchecked")
+    public static void writeXpToJsonFile(JSONArray writeObjects) {
+        JSONObject mainObject = new JSONObject();
+        mainObject.put("Xp", writeObjects);
+
+        try (FileWriter file = new FileWriter("src/main/resources/xp.json")) {
+            file.write(mainObject.toJSONString());
+            file.flush();
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static JSONArray readXp() {
+        JSONParser jsonParser = new JSONParser();
+        try (FileReader reader = new FileReader("src/main/resources/xp.json")) {
+
+            JSONObject jsonObject = (JSONObject) jsonParser.parse(reader);
+            return (JSONArray) jsonObject.get("Xp");
+
+        } catch (IOException | ParseException e) {
+            throw new RuntimeException();
+        }
+    }
+
     public static HashMap<String, String> getRoleIds() {
         readConfig();
         HashMap<String, String> values = new HashMap<>();
@@ -114,6 +141,7 @@ public class Main {
             commandFeedbackDeletionDelayInSeconds = (long) jsonObject.get("CommandFeedbackDeletionDelayInSeconds");
             loggingChannelID = (String) jsonObject.get("LoggingChannelID");
             bannedLinks = (JSONArray) jsonObject.get("BannedLinks");
+            xpPerMessage = (long) jsonObject.get("XpPerMessage");
 
         } catch (IOException | ParseException e) {
             throw new RuntimeException();
@@ -123,6 +151,11 @@ public class Main {
     public static boolean isNotifyUserAtModerationAction() {
         readConfig();
         return notifyUserAtModerationAction;
+    }
+
+    public static long getXpPerMessage() {
+        readConfig();
+        return xpPerMessage;
     }
 
     public static boolean isDeleteCommandFeedback() {

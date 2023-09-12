@@ -9,15 +9,18 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 import java.awt.*;
 import java.time.Instant;
 
 public class MessageListener extends ListenerAdapter {
 
+    @SuppressWarnings("unchecked")
     @Override
     public void onMessageReceived(MessageReceivedEvent e) {
-        if(e.getChannel() instanceof PrivateChannel || !e.getGuild().getId().equals(Main.getGuildId()))
+        if(e.getChannel() instanceof PrivateChannel || !e.getGuild().getId().equals(Main.getGuildId()) || e.getMember() == null || e.getMember().getUser().isBot())
             return;
 
         if(e.getMessage().getContentRaw().startsWith(Main.PREFIX))
@@ -66,5 +69,33 @@ public class MessageListener extends ListenerAdapter {
                 return;
             }
         }
+
+        JSONArray jsonArray = Main.readXp();
+        for(Object o : jsonArray) {
+            if(!(o instanceof JSONObject jsonObject))
+                continue;
+
+            if(jsonObject.get("id").equals(e.getMember().getId())) {
+                long currentXp = (long) jsonObject.get("xp");
+                long level = (long) Math.floor(Math.pow(currentXp, (2f / 5f)));
+                currentXp += Main.getXpPerMessage();
+
+                if(level != (long) Math.floor(Math.pow(currentXp, (2f / 5f)))) {
+                    e.getMessage().reply("Yayy, new level: " + Math.floor(Math.pow(currentXp, (2f / 5f)))).queue();
+                }
+
+                jsonObject.replace("xp", currentXp);
+                Main.writeXpToJsonFile(jsonArray);
+
+                return;
+            }
+        }
+
+        JSONObject object = new JSONObject();
+        object.put("id", e.getMember().getId());
+        object.put("xp", Main.getXpPerMessage());
+
+        jsonArray.add(object);
+        Main.writeXpToJsonFile(jsonArray);
     }
 }
