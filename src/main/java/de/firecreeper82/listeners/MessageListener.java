@@ -17,7 +17,7 @@ public class MessageListener extends ListenerAdapter {
 
     @Override
     public void onMessageReceived(MessageReceivedEvent e) {
-        if(e.getChannel() instanceof PrivateChannel)
+        if(e.getChannel() instanceof PrivateChannel || !e.getGuild().getId().equals(Main.getGuildId()))
             return;
 
         if(e.getMessage().getContentRaw().startsWith(Main.PREFIX))
@@ -63,6 +63,7 @@ public class MessageListener extends ListenerAdapter {
                 eb.addField("Message", "```" + e.getMessage().getContentRaw() + "```", false);
 
                 Logger.logUserWarningBecauseOfMessage(eb, e.getMember(), e.getMessage());
+                return;
             }
         }
     }

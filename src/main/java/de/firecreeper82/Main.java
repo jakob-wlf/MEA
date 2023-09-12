@@ -3,14 +3,11 @@ package de.firecreeper82;
 import de.firecreeper82.commands.CommandManager;
 import de.firecreeper82.commands.impl.*;
 import de.firecreeper82.listeners.MessageListener;
-import de.firecreeper82.listeners.ReadyListener;
 import de.firecreeper82.listeners.SlashListener;
 import de.firecreeper82.permissions.Permission;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import org.json.simple.JSONArray;
@@ -20,7 +17,6 @@ import org.json.simple.parser.ParseException;
 
 import java.io.*;
 import java.util.*;
-import java.util.stream.Collectors;
 public class Main {
 
     public static String TOKEN;
@@ -32,7 +28,6 @@ public class Main {
     private static boolean notifyUserAtModerationAction;
     private static boolean logCommandUsage;
     private static boolean deleteCommandFeedback;
-    private static String mutedRoleId;
     private static long commandFeedbackDeletionDelayInSeconds;
     private static String loggingChannelID;
     private static JSONArray bannedLinks;
@@ -50,7 +45,6 @@ public class Main {
                 .enableIntents(GatewayIntent.GUILD_MEMBERS)
                 .setMemberCachePolicy(MemberCachePolicy.ALL)
                 .addEventListeners(new MessageListener())
-                .addEventListeners(new ReadyListener())
                 .addEventListeners(new SlashListener())
                 .build();
 
@@ -96,62 +90,6 @@ public class Main {
         readConfig();
     }
 
-
-    @SuppressWarnings("unchecked")
-    public static void muteTimer() {
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                for(Object object : readMutedMembers()) {
-                    JSONObject jsonObject = (JSONObject) object;
-
-                    long finishedTime = (long) jsonObject.get("FinishedTime");
-                    if(System.currentTimeMillis() >= finishedTime) {
-                        Guild guild = jda.getGuildById((String) jsonObject.get("GuildID"));
-                        if(guild == null)
-                            return;
-
-                        String memberId = (String) jsonObject.get("MemberID");
-                        guild.retrieveMemberById(memberId).queue(member -> {
-                            JSONArray objects = Main.readMutedMembers();
-
-                            JSONArray writeObjects = new JSONArray();
-                            for(Object o : objects) {
-                                if(!(o instanceof JSONObject jObject))
-                                    continue;
-                                if(!jObject.get("MemberID").equals(memberId))
-                                    writeObjects.add(jObject);
-
-                            }
-
-                            writeMutedMembersToJsonFile(writeObjects);
-
-                            Role role = guild.getRoleById(getMutedRoleId());
-                            if(role == null)
-                                return;
-
-                            guild.removeRoleFromMember(member, role).queue();
-                        });
-                    }
-                }
-            }
-        }, 0, 1000);
-    }
-
-    @SuppressWarnings("unchecked")
-    public static void writeMutedMembersToJsonFile(JSONArray writeObjects) {
-        JSONObject mainObject = new JSONObject();
-        mainObject.put("MutedMembers", writeObjects);
-
-        try (FileWriter file = new FileWriter("src/main/resources/mutedMembers.json")) {
-            file.write(mainObject.toJSONString());
-            file.flush();
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public static HashMap<String, String> getRoleIds() {
         readConfig();
         HashMap<String, String> values = new HashMap<>();
@@ -173,7 +111,6 @@ public class Main {
             notifyUserAtModerationAction = (Boolean) jsonObject.get("NotifyUserAtModerationAction");
             deleteCommandFeedback = (Boolean) jsonObject.get("DeleteCommandFeedback");
             logCommandUsage = (Boolean) jsonObject.get("LogCommandUsage");
-            mutedRoleId = (String) jsonObject.get("MutedRoleID");
             commandFeedbackDeletionDelayInSeconds = (long) jsonObject.get("CommandFeedbackDeletionDelayInSeconds");
             loggingChannelID = (String) jsonObject.get("LoggingChannelID");
             bannedLinks = (JSONArray) jsonObject.get("BannedLinks");
@@ -183,27 +120,9 @@ public class Main {
         }
     }
 
-
-    public static JSONArray readMutedMembers() {
-        JSONParser jsonParser = new JSONParser();
-        try (FileReader reader = new FileReader("src/main/resources/mutedMembers.json")) {
-
-            JSONObject jsonObject = (JSONObject) jsonParser.parse(reader);
-            return (JSONArray) jsonObject.get("MutedMembers");
-
-        } catch (IOException | ParseException e) {
-            throw new RuntimeException();
-        }
-    }
-
     public static boolean isNotifyUserAtModerationAction() {
         readConfig();
         return notifyUserAtModerationAction;
-    }
-
-    public static String getMutedRoleId() {
-        readConfig();
-        return mutedRoleId;
     }
 
     public static boolean isDeleteCommandFeedback() {

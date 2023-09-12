@@ -9,14 +9,12 @@ import de.firecreeper82.util.Util;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.utils.TimeFormat;
 import org.jetbrains.annotations.NotNull;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.awt.*;
@@ -33,12 +31,11 @@ public class MuteCmd extends Command {
         Main.jda.updateCommands().addCommands(
                 Commands.slash(aliases[0], description)
                         .addOption(OptionType.USER, "user", "The user to mute", true)
-                        .addOption(OptionType.STRING, "time", "The time for the mute (1m/1h/1d/1w/infinite)")
+                        .addOption(OptionType.STRING, "time", "The time for the mute (1m/1h/1d/1w/infinite)", true)
                         .addOption(OptionType.STRING, "reason", "The reason for the mute", true)
         ).queue();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void onCommand(String[] args, Message message, Member member) throws MemberNotFoundException, WrongArgumentsException, InvalidArgumentsException, InterruptedException, RoleNoFoundException, MemberIsAlreadyMutedException {
         Member muteMember = Util.getMemberFromString(args[0], message);
@@ -46,34 +43,11 @@ public class MuteCmd extends Command {
         if (muteMember == null)
             throw new MemberNotFoundException("The member you are trying to mute could not be found.");
 
-        Role muteRole = message.getGuild().getRoleById(Main.getMutedRoleId());
-        if (muteRole == null)
-            throw new RoleNoFoundException("The muting role could not be found. Check the config to confirm the role id.");
-
-        for(Object object : Main.readMutedMembers()) {
-            if(!(object instanceof JSONObject jObject))
-                continue;
-            if(jObject.get("MemberID").equals(muteMember.getId()))
-                throw new MemberIsAlreadyMutedException("The member you are trying to mute is already muted.");
-        }
-
-        message.getGuild().addRoleToMember(muteMember, muteRole).queue();
-
         long time = checkForValidTime(args[1]);
-        if(time != 0) {
-            long finishTime = System.currentTimeMillis() + time;
-
-            JSONObject object = new JSONObject();
-            object.put("FinishedTime", finishTime);
-            object.put("GuildID", muteMember.getGuild().getId());
-            object.put("MemberID", muteMember.getId());
-
-            JSONArray objects = Main.readMutedMembers();
-            objects.add(object);
-
-            Main.writeMutedMembersToJsonFile(objects);
-
-        }
+        if(time != 0)
+            muteMember.timeoutFor(time, TimeUnit.MILLISECONDS).queue();
+        else
+            muteMember.timeoutFor(2147483647, TimeUnit.DAYS).queue();
 
         final String reason = String.join(" ", Arrays.stream(args, 2, args.length).toList());
         sendConfirmEmbed(message, member, time, muteMember, reason);
@@ -103,34 +77,11 @@ public class MuteCmd extends Command {
         if (muteMember == null)
             throw new MemberNotFoundException("The member you are trying to mute could not be found.");
 
-        Role muteRole = muteMember.getGuild().getRoleById(Main.getMutedRoleId());
-        if (muteRole == null)
-            throw new RoleNoFoundException("The muting role could not be found. Check the config to confirm the role id.");
-
-        for(Object object : Main.readMutedMembers()) {
-            if(!(object instanceof JSONObject jObject))
-                continue;
-            if(jObject.get("MemberID").equals(muteMember.getId()))
-                throw new MemberIsAlreadyMutedException("The member you are trying to mute is already muted.");
-        }
-
-        muteMember.getGuild().addRoleToMember(muteMember, muteRole).queue();
-
         long time = checkForValidTime(Objects.requireNonNull(event.getOption("time", OptionMapping::getAsString)));
-        if(time != 0) {
-            long finishTime = System.currentTimeMillis() + time;
-
-            JSONObject object = new JSONObject();
-            object.put("FinishedTime", finishTime);
-            object.put("GuildID", muteMember.getGuild().getId());
-            object.put("MemberID", muteMember.getId());
-
-            JSONArray objects = Main.readMutedMembers();
-            objects.add(object);
-
-            Main.writeMutedMembersToJsonFile(objects);
-
-        }
+        if(time != 0)
+            muteMember.timeoutFor(time, TimeUnit.MILLISECONDS).queue();
+        else
+            muteMember.timeoutFor(2147483647, TimeUnit.DAYS).queue();
 
         String embedDescription = "Successfully muted the member " + muteMember.getAsMention() + "!\n";
         if(time != 0)
@@ -149,7 +100,8 @@ public class MuteCmd extends Command {
                 null
         );
 
-        eb.addField("Reason", reason, true);
+        if(reason != null)
+            eb.addField("Reason", reason, true);
 
         notifyUser(eb, muteMember.getUser());
     }
