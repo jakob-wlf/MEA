@@ -2,6 +2,7 @@ package de.firecreeper82;
 
 import de.firecreeper82.commands.CommandManager;
 import de.firecreeper82.commands.impl.*;
+import de.firecreeper82.listeners.JoinListener;
 import de.firecreeper82.listeners.MessageListener;
 import de.firecreeper82.listeners.SlashListener;
 import de.firecreeper82.permissions.Permission;
@@ -36,6 +37,7 @@ public class Main {
     private static String levelUpImage;
     private static String levelImage;
     private static JSONArray bannedLinks;
+    private static JSONArray autoRoleIDs;
     private static long xpPerMessage;
 
     public static JDA jda;
@@ -52,6 +54,7 @@ public class Main {
                 .setMemberCachePolicy(MemberCachePolicy.ALL)
                 .addEventListeners(new MessageListener())
                 .addEventListeners(new SlashListener())
+                .addEventListeners(new JoinListener())
                 .build();
 
         commandManager = new CommandManager();
@@ -173,6 +176,7 @@ public class Main {
             levelUpImage = (String) jsonObject.get("LevelUpImage");
             levelImage = (String) jsonObject.get("LevelImage");
             bannedLinks = (JSONArray) jsonObject.get("BannedLinks");
+            autoRoleIDs = (JSONArray) jsonObject.get("AutoRoleIDs");
             xpPerMessage = (long) jsonObject.get("XpPerMessage");
 
         } catch (IOException | ParseException e) {
@@ -183,6 +187,11 @@ public class Main {
     public static boolean isNotifyUserAtModerationAction() {
         readConfig();
         return notifyUserAtModerationAction;
+    }
+
+    public static JSONArray getAutoRoleIDs() {
+        readConfig();
+        return autoRoleIDs;
     }
 
     public static long getXpPerMessage() {

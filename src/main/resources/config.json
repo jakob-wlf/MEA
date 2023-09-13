@@ -19,5 +19,9 @@
 
   "BannedLinks": [
       "pornhub.com"
+  ],
+
+  "AutoRoleIDs": [
+    "1151593060053045381"
   ]
 }
