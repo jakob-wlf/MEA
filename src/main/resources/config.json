@@ -10,6 +10,9 @@
   "CommandFeedbackDeletionDelayInSeconds": 7,
 
   "LoggingChannelID": "1140585987068678184",
+  "LevelingChannelID": "1151471220206870568",
+
+  "LevelUpImage": "https://cdn.discordapp.com/attachments/1139918206795005964/1151472328350371931/giphy.gif",
 
   "XpPerMessage": 2,
 

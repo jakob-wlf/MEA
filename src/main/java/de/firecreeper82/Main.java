@@ -30,6 +30,8 @@ public class Main {
     private static boolean deleteCommandFeedback;
     private static long commandFeedbackDeletionDelayInSeconds;
     private static String loggingChannelID;
+    private static String levelingChannelID;
+    private static String levelUpImage;
     private static JSONArray bannedLinks;
     private static long xpPerMessage;
 
@@ -86,6 +88,12 @@ public class Main {
                 List.of("User"),
                 Permission.MEMBER
         ));
+        commandManager.addCommand(new XpCommand(
+                new String[] {"xp", "level"},
+                "Check for your level",
+                List.of(),
+                Permission.MEMBER
+        ));
 
 
         readConfig();
@@ -140,6 +148,8 @@ public class Main {
             logCommandUsage = (Boolean) jsonObject.get("LogCommandUsage");
             commandFeedbackDeletionDelayInSeconds = (long) jsonObject.get("CommandFeedbackDeletionDelayInSeconds");
             loggingChannelID = (String) jsonObject.get("LoggingChannelID");
+            levelingChannelID = (String) jsonObject.get("LevelingChannelID");
+            levelUpImage = (String) jsonObject.get("LevelUpImage");
             bannedLinks = (JSONArray) jsonObject.get("BannedLinks");
             xpPerMessage = (long) jsonObject.get("XpPerMessage");
 
@@ -156,6 +166,16 @@ public class Main {
     public static long getXpPerMessage() {
         readConfig();
         return xpPerMessage;
+    }
+
+    public static String getLevelingChannelID() {
+        readConfig();
+        return levelingChannelID;
+    }
+
+    public static String getLevelUpImage() {
+        readConfig();
+        return levelUpImage;
     }
 
     public static boolean isDeleteCommandFeedback() {

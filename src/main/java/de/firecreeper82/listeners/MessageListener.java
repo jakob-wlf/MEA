@@ -6,14 +6,18 @@ import de.firecreeper82.util.Util;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.Channel;
 import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.awt.*;
 import java.time.Instant;
+import java.util.concurrent.TimeUnit;
 
 public class MessageListener extends ListenerAdapter {
 
@@ -23,8 +27,7 @@ public class MessageListener extends ListenerAdapter {
         if(e.getChannel() instanceof PrivateChannel || !e.getGuild().getId().equals(Main.getGuildId()) || e.getMember() == null || e.getMember().getUser().isBot())
             return;
 
-        if(e.getMessage().getContentRaw().startsWith(Main.PREFIX))
-            Main.commandManager.onCommand(e.getMessage());
+
 
         for(Object o : Main.getBannedLinks()) {
             if(!(o instanceof String link))
@@ -80,14 +83,18 @@ public class MessageListener extends ListenerAdapter {
                 long level = (long) Math.floor(Math.pow(currentXp, (2f / 5f)));
                 currentXp += Main.getXpPerMessage();
 
-                if(level != (long) Math.floor(Math.pow(currentXp, (2f / 5f)))) {
-                    e.getMessage().reply("Yayy, new level: " + Math.floor(Math.pow(currentXp, (2f / 5f)))).queue();
-                }
-
                 jsonObject.replace("xp", currentXp);
                 Main.writeXpToJsonFile(jsonArray);
 
-                return;
+                if(level != (long) Math.floor(Math.pow(currentXp, (2f / 5f)))) {
+                    TextChannel channel = e.getGuild().getTextChannelById(Main.getLevelingChannelID());
+                    if(channel == null)
+                        continue;
+
+                    EmbedBuilder eb = getLevelUpEmbed(e, currentXp);
+                    channel.sendMessageEmbeds(eb.build()).queue();
+                    channel.sendMessage(e.getMember().getAsMention()).queue(message -> message.delete().queueAfter(1, TimeUnit.SECONDS));
+                }
             }
         }
 
@@ -97,5 +104,23 @@ public class MessageListener extends ListenerAdapter {
 
         jsonArray.add(object);
         Main.writeXpToJsonFile(jsonArray);
+
+        if(e.getMessage().getContentRaw().startsWith(Main.PREFIX))
+            Main.commandManager.onCommand(e.getMessage());
+    }
+
+    @NotNull
+    private static EmbedBuilder getLevelUpEmbed(MessageReceivedEvent e, long currentXp) {
+        EmbedBuilder eb = new EmbedBuilder();
+        eb.setThumbnail(Main.getLevelUpImage());
+        eb.setAuthor("Level Up!!!");
+        eb.setColor(new Color(145, 255, 237));
+        eb.setDescription(
+                "Congratulations " + e.getMember().getAsMention() + "! \n" +
+                "You leveled up to Level " + (int) Math.floor(Math.pow(currentXp, (2f / 5f)))
+        );
+        eb.setFooter("Level Up");
+        eb.setTimestamp(Instant.now());
+        return eb;
     }
 }
