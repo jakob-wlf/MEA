@@ -32,6 +32,7 @@ public class Main {
     private static String loggingChannelID;
     private static String levelingChannelID;
     private static String levelUpImage;
+    private static String levelImage;
     private static JSONArray bannedLinks;
     private static long xpPerMessage;
 
@@ -150,6 +151,7 @@ public class Main {
             loggingChannelID = (String) jsonObject.get("LoggingChannelID");
             levelingChannelID = (String) jsonObject.get("LevelingChannelID");
             levelUpImage = (String) jsonObject.get("LevelUpImage");
+            levelImage = (String) jsonObject.get("LevelImage");
             bannedLinks = (JSONArray) jsonObject.get("BannedLinks");
             xpPerMessage = (long) jsonObject.get("XpPerMessage");
 
@@ -166,6 +168,11 @@ public class Main {
     public static long getXpPerMessage() {
         readConfig();
         return xpPerMessage;
+    }
+
+    public static String getLevelImage() {
+        readConfig();
+        return levelImage;
     }
 
     public static String getLevelingChannelID() {

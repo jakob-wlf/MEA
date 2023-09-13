@@ -27,7 +27,10 @@ public class MessageListener extends ListenerAdapter {
         if(e.getChannel() instanceof PrivateChannel || !e.getGuild().getId().equals(Main.getGuildId()) || e.getMember() == null || e.getMember().getUser().isBot())
             return;
 
-
+        if(e.getMessage().getContentRaw().startsWith(Main.PREFIX)) {
+            Main.commandManager.onCommand(e.getMessage());
+            return;
+        }
 
         for(Object o : Main.getBannedLinks()) {
             if(!(o instanceof String link))
@@ -80,33 +83,36 @@ public class MessageListener extends ListenerAdapter {
 
             if(jsonObject.get("id").equals(e.getMember().getId())) {
                 long currentXp = (long) jsonObject.get("xp");
-                long level = (long) Math.floor(Math.pow(currentXp, (2f / 5f)));
+                long level = (long) jsonObject.get("level");
                 currentXp += Main.getXpPerMessage();
 
                 jsonObject.replace("xp", currentXp);
-                Main.writeXpToJsonFile(jsonArray);
 
-                if(level != (long) Math.floor(Math.pow(currentXp, (2f / 5f)))) {
+                double newLevel = Math.floor(Math.pow(currentXp, (2f / 5f)));
+                if(level != (long) newLevel) {
+                    jsonObject.replace("level", (long) newLevel);
+
                     TextChannel channel = e.getGuild().getTextChannelById(Main.getLevelingChannelID());
                     if(channel == null)
                         continue;
 
                     EmbedBuilder eb = getLevelUpEmbed(e, currentXp);
-                    channel.sendMessageEmbeds(eb.build()).queue();
                     channel.sendMessage(e.getMember().getAsMention()).queue(message -> message.delete().queueAfter(1, TimeUnit.SECONDS));
+                    channel.sendMessageEmbeds(eb.build()).queue();
                 }
+
+                Main.writeXpToJsonFile(jsonArray);
+                return;
             }
         }
 
         JSONObject object = new JSONObject();
         object.put("id", e.getMember().getId());
         object.put("xp", Main.getXpPerMessage());
+        object.put("level", (long) Math.floor(Math.pow(Main.getXpPerMessage(), (2f / 5f))));
 
         jsonArray.add(object);
         Main.writeXpToJsonFile(jsonArray);
-
-        if(e.getMessage().getContentRaw().startsWith(Main.PREFIX))
-            Main.commandManager.onCommand(e.getMessage());
     }
 
     @NotNull
