@@ -17,6 +17,7 @@ import org.json.simple.JSONObject;
 
 import java.awt.*;
 import java.time.Instant;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 public class MessageListener extends ListenerAdapter {
@@ -120,9 +121,9 @@ public class MessageListener extends ListenerAdapter {
         EmbedBuilder eb = new EmbedBuilder();
         eb.setThumbnail(Main.getLevelUpImage());
         eb.setAuthor("Level Up!!!");
-        eb.setColor(new Color(145, 255, 237));
+        eb.setColor(new Color(66, 135, 245));
         eb.setDescription(
-                "Congratulations " + e.getMember().getAsMention() + "! \n" +
+                "Congratulations " + Objects.requireNonNull(e.getMember()).getAsMention() + "! \n" +
                 "You leveled up to Level " + (int) Math.floor(Math.pow(currentXp, (2f / 5f)))
         );
         eb.setFooter("Level Up");

@@ -26,12 +26,6 @@ public class KickCmd extends Command {
 
     public KickCmd(String[] aliases, String description, List<String> requiredArgs, Permission requiredPerm) {
         super(aliases, description, requiredArgs, requiredPerm);
-
-        Main.jda.updateCommands().addCommands(
-                Commands.slash(aliases[0], description)
-                        .addOption(OptionType.USER, "user", "The user to kick", true)
-                        .addOption(OptionType.STRING, "reason", "The reason for the kick", true)
-        ).queue();
     }
 
     @Override

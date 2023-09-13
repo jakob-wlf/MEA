@@ -27,13 +27,6 @@ import java.util.concurrent.TimeUnit;
 public class MuteCmd extends Command {
     public MuteCmd(String[] aliases, String description, List<String> requiredArgs, Permission requiredPerm) {
         super(aliases, description, requiredArgs, requiredPerm);
-
-        Main.jda.updateCommands().addCommands(
-                Commands.slash(aliases[0], description)
-                        .addOption(OptionType.USER, "user", "The user to mute", true)
-                        .addOption(OptionType.STRING, "time", "The time for the mute (1m/1h/1d/1w/infinite)", true)
-                        .addOption(OptionType.STRING, "reason", "The reason for the mute", true)
-        ).queue();
     }
 
     @Override

@@ -62,7 +62,7 @@ public class XpCommand extends Command {
                 eb.setThumbnail(member.getAvatarUrl());
                 eb.setAuthor("LEVEL " + (int) level + "!!");
                 eb.setThumbnail(Main.getLevelImage());
-                eb.setColor(new Color(145, 255, 237));
+                eb.setColor(new Color(66, 135, 245));
                 eb.setDescription(
                         "You have **" + currentXp + "/" + newLevelXp  + "** xp" +
                         "```ansi\n" + bars + "\n```\n"

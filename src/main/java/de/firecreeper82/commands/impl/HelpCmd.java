@@ -21,8 +21,6 @@ import java.util.List;
 public class HelpCmd extends Command {
     public HelpCmd(String[] aliases, String description, List<String> requiredArgs, Permission requiredPerm) {
         super(aliases, description, requiredArgs, requiredPerm);
-
-        Main.jda.updateCommands().addCommands(Commands.slash(aliases[0], description)).queue();
     }
 
     @Override

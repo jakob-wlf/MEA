@@ -27,11 +27,6 @@ public class UnMuteCmd extends Command {
 
     public UnMuteCmd(String[] aliases, String description, List<String> requiredArgs, Permission requiredPerm) {
         super(aliases, description, requiredArgs, requiredPerm);
-
-        Main.jda.updateCommands().addCommands(
-                Commands.slash(aliases[0], description)
-                        .addOption(OptionType.USER, "user", "The user to unmute", true)
-        ).queue();
     }
 
     @Override

@@ -8,6 +8,8 @@ import de.firecreeper82.permissions.Permission;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import org.json.simple.JSONArray;
@@ -72,7 +74,7 @@ public class Main {
                 Permission.ADMIN
         ));
         commandManager.addCommand(new MuteCmd(
-                new String[]{"mute", "m"},
+                new String[]{"mute", "m", "timeout"},
                 "Mute a user",
                 List.of("User", "Mute Duration (1m/1h/1d/1w/infinite)", "Reason"),
                 Permission.ADMIN
@@ -96,6 +98,24 @@ public class Main {
                 Permission.MEMBER
         ));
 
+        Main.jda.updateCommands().addCommands(
+                Commands.slash("ban", "Ban a user from the server")
+                        .addOption(OptionType.USER, "user", "The user to ban", true)
+                        .addOption(OptionType.STRING, "reason", "The reason for the ban", true),
+                Commands.slash("xp", "Check for your level"),
+                Commands.slash("clear", "Clear the chat")
+                        .addOption(OptionType.INTEGER, "count", "The number of messages to clear", true),
+                Commands.slash("help", "List all commands"),
+                Commands.slash("kick", "Kick a user from the server")
+                        .addOption(OptionType.USER, "user", "The user to kick", true)
+                        .addOption(OptionType.STRING, "reason", "The reason for the kick", true),
+                Commands.slash("mute", "Mute a member")
+                        .addOption(OptionType.USER, "user", "The user to mute", true)
+                        .addOption(OptionType.STRING, "time", "The time for the mute (1m/1h/1d/1w/infinite)", true)
+                        .addOption(OptionType.STRING, "reason", "The reason for the mute", true),
+                Commands.slash("unmute", "Unmute a member")
+                        .addOption(OptionType.USER, "user", "The user to unmute", true)
+        ).queue();
 
         readConfig();
     }
