@@ -79,8 +79,8 @@ public class Main {
         commandManager.addCommand(new MuteCmd(
                 new String[]{"mute", "m", "timeout"},
                 "Mute a user",
-                List.of("User", "Mute Duration (1m/1h/1d/1w/infinite)", "Reason"),
-                Permission.ADMIN
+                List.of("User", "Mute Duration (1m/1h/1d)", "Reason"),
+                Permission.MODERATION
         ));
         commandManager.addCommand(new HelpCmd(
                 new String[]{"help"},
@@ -100,6 +100,12 @@ public class Main {
                 List.of(),
                 Permission.MEMBER
         ));
+        commandManager.addCommand(new PollCommand(
+                new String[] {"poll", "p", },
+                "Create a poll",
+                List.of("Title", "Duration (1m/1h/1d/1w)", "Description (Use \"\\n\" for line break)"),
+                Permission.ADMIN
+        ));
 
         Main.jda.updateCommands().addCommands(
                 Commands.slash("ban", "Ban a user from the server")
@@ -114,7 +120,7 @@ public class Main {
                         .addOption(OptionType.STRING, "reason", "The reason for the kick", true),
                 Commands.slash("mute", "Mute a member")
                         .addOption(OptionType.USER, "user", "The user to mute", true)
-                        .addOption(OptionType.STRING, "time", "The time for the mute (1m/1h/1d/1w/infinite)", true)
+                        .addOption(OptionType.STRING, "time", "The time for the mute (1m/1h/1d)", true)
                         .addOption(OptionType.STRING, "reason", "The reason for the mute", true),
                 Commands.slash("unmute", "Unmute a member")
                         .addOption(OptionType.USER, "user", "The user to unmute", true)

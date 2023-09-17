@@ -1,5 +1,6 @@
 package de.firecreeper82.util;
 
+import de.firecreeper82.exceptions.exceptions.WrongArgumentsException;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -67,6 +68,24 @@ public class Util {
         eb.setImage(image);
         eb.setThumbnail(thumbnail);
         return eb;
+    }
+
+    public static long checkForValidTime(String time, String syntax) throws WrongArgumentsException {
+        long multiplier;
+        switch(time.substring(time.length() -1)) {
+            case "m" -> multiplier = 60 * 1000L;
+            case "h" -> multiplier = 60 * 60 * 1000L;
+            case "d" -> multiplier = 24 * 60 * 60 * 1000L;
+            default -> throw new WrongArgumentsException("The provided arguments do not match the syntax ``" + syntax + "``");
+        }
+
+        if(!Util.isInt(time.substring(0, time.length() -1)))
+            throw new WrongArgumentsException("The provided arguments do not match the syntax ``" + syntax + "``");
+
+        int rawTime = Integer.parseInt(time.substring(0, time.length() -1));
+        if(rawTime <= 0)
+            throw new WrongArgumentsException("The provided arguments do not match the syntax ``" + syntax + "``");
+        return rawTime * multiplier;
     }
 
 }

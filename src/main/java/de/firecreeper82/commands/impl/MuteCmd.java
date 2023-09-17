@@ -11,11 +11,8 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.utils.TimeFormat;
 import org.jetbrains.annotations.NotNull;
-import org.json.simple.JSONObject;
 
 import java.awt.*;
 import java.time.Instant;
@@ -23,6 +20,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+
+import static de.firecreeper82.util.Util.checkForValidTime;
 
 public class MuteCmd extends Command {
     public MuteCmd(String[] aliases, String description, List<String> requiredArgs, Permission requiredPerm) {
@@ -36,11 +35,9 @@ public class MuteCmd extends Command {
         if (muteMember == null)
             throw new MemberNotFoundException("The member you are trying to mute could not be found.");
 
-        long time = checkForValidTime(args[1]);
-        if(time != 0)
+        long time = checkForValidTime(args[1], getSyntax());
+        if(time > 0)
             muteMember.timeoutFor(time, TimeUnit.MILLISECONDS).queue();
-        else
-            muteMember.timeoutFor(2147483647, TimeUnit.DAYS).queue();
 
         final String reason = String.join(" ", Arrays.stream(args, 2, args.length).toList());
         sendConfirmEmbed(message, member, time, muteMember, reason);
@@ -70,14 +67,12 @@ public class MuteCmd extends Command {
         if (muteMember == null)
             throw new MemberNotFoundException("The member you are trying to mute could not be found.");
 
-        long time = checkForValidTime(Objects.requireNonNull(event.getOption("time", OptionMapping::getAsString)));
-        if(time != 0)
+        long time = checkForValidTime(Objects.requireNonNull(event.getOption("time", OptionMapping::getAsString)), getSyntax());
+        if(time > 0)
             muteMember.timeoutFor(time, TimeUnit.MILLISECONDS).queue();
-        else
-            muteMember.timeoutFor(2147483647, TimeUnit.DAYS).queue();
 
         String embedDescription = "Successfully muted the member " + muteMember.getAsMention() + "!\n";
-        if(time != 0)
+        if(time > 0)
             embedDescription += "He will be unmuted " + TimeFormat.RELATIVE.format(System.currentTimeMillis() + time);
 
         final String reason = event.getOption("reason", OptionMapping::getAsString);
@@ -138,23 +133,5 @@ public class MuteCmd extends Command {
         return eb;
     }
 
-    private long checkForValidTime(String time) throws WrongArgumentsException {
-        if(time.equalsIgnoreCase("infinite"))
-            return 0;
 
-        long multiplier;
-        switch(time.substring(time.length() -1)) {
-            case "m" -> multiplier = 60 * 1000L;
-            case "h" -> multiplier = 60 * 60 * 1000L;
-            case "d" -> multiplier = 24 * 60 * 60 * 1000L;
-            case "w" -> multiplier = 7 * 24 * 60 * 60 * 1000L;
-            default -> throw new WrongArgumentsException("The provided arguments do not match the syntax ``" + getSyntax() + "``");
-        }
-
-        if(!Util.isInt(time.substring(0, time.length() -1)))
-            throw new WrongArgumentsException("The provided arguments do not match the syntax ``" + getSyntax() + "``");
-
-        int rawTime = Integer.parseInt(time.substring(0, time.length() -1));
-        return rawTime * multiplier;
-    }
 }
