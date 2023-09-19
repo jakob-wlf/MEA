@@ -70,14 +70,8 @@ public class Util {
         return eb;
     }
 
-    public static long checkForValidTime(String time, String syntax) throws WrongArgumentsException {
-        long multiplier;
-        switch(time.substring(time.length() -1)) {
-            case "m" -> multiplier = 60 * 1000L;
-            case "h" -> multiplier = 60 * 60 * 1000L;
-            case "d" -> multiplier = 24 * 60 * 60 * 1000L;
-            default -> throw new WrongArgumentsException("The provided arguments do not match the syntax ``" + syntax + "``");
-        }
+    public static long checkForValidTime(String time, String syntax, boolean onlyUntilDay) throws WrongArgumentsException {
+        long multiplier = getMultiplier(time, syntax, onlyUntilDay);
 
         if(!Util.isInt(time.substring(0, time.length() -1)))
             throw new WrongArgumentsException("The provided arguments do not match the syntax ``" + syntax + "``");
@@ -86,6 +80,23 @@ public class Util {
         if(rawTime <= 0)
             throw new WrongArgumentsException("The provided arguments do not match the syntax ``" + syntax + "``");
         return rawTime * multiplier;
+    }
+
+    private static long getMultiplier(String time, String syntax, boolean onlyUntilDay) throws WrongArgumentsException {
+        long multiplier;
+        switch(time.substring(time.length() -1)) {
+            case "m" -> multiplier = 60 * 1000L;
+            case "h" -> multiplier = 60 * 60 * 1000L;
+            case "d" -> multiplier = 24 * 60 * 60 * 1000L;
+            case "w" -> {
+                if (!onlyUntilDay)
+                     multiplier = 7 * 24 * 60 * 60 * 1000L;
+                else
+                    throw new WrongArgumentsException("The provided arguments do not match the syntax ``" + syntax + "``");
+            }
+            default -> throw new WrongArgumentsException("The provided arguments do not match the syntax ``" + syntax + "``");
+        }
+        return multiplier;
     }
 
 }

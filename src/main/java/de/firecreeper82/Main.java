@@ -4,6 +4,7 @@ import de.firecreeper82.commands.CommandManager;
 import de.firecreeper82.commands.impl.*;
 import de.firecreeper82.listeners.JoinListener;
 import de.firecreeper82.listeners.MessageListener;
+import de.firecreeper82.listeners.PollListener;
 import de.firecreeper82.listeners.SlashListener;
 import de.firecreeper82.permissions.Permission;
 import net.dv8tion.jda.api.JDA;
@@ -47,6 +48,7 @@ public class Main {
         BufferedReader reader = new BufferedReader(new FileReader("src/main/resources/token.txt"));
         TOKEN = reader.readLine();
 
+        PollListener pollListener = new PollListener();
         jda = JDABuilder.createDefault(TOKEN)
                 .setActivity(Activity.watching("you"))
                 .enableIntents(GatewayIntent.MESSAGE_CONTENT)
@@ -55,6 +57,7 @@ public class Main {
                 .addEventListeners(new MessageListener())
                 .addEventListeners(new SlashListener())
                 .addEventListeners(new JoinListener())
+                .addEventListeners(pollListener)
                 .build();
 
         commandManager = new CommandManager();
@@ -104,7 +107,8 @@ public class Main {
                 new String[] {"poll", "p", },
                 "Create a poll",
                 List.of("Title", "Duration (1m/1h/1d/1w)", "Description (Use \"\\n\" for line break)"),
-                Permission.ADMIN
+                Permission.ADMIN,
+                pollListener
         ));
 
         Main.jda.updateCommands().addCommands(
@@ -123,7 +127,11 @@ public class Main {
                         .addOption(OptionType.STRING, "time", "The time for the mute (1m/1h/1d)", true)
                         .addOption(OptionType.STRING, "reason", "The reason for the mute", true),
                 Commands.slash("unmute", "Unmute a member")
-                        .addOption(OptionType.USER, "user", "The user to unmute", true)
+                        .addOption(OptionType.USER, "user", "The user to unmute", true),
+                Commands.slash("poll", "Create a poll")
+                        .addOption(OptionType.STRING, "title", "The title of the poll", true)
+                        .addOption(OptionType.STRING, "time", "The time for the poll (1m/1h/1d/1w)", true)
+                        .addOption(OptionType.STRING, "description", "The description of the poll (Use \"\\n\" for line break)", true)
         ).queue();
 
         readConfig();

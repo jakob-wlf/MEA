@@ -60,7 +60,7 @@ public class XpCommand extends Command {
 
                 EmbedBuilder eb = new EmbedBuilder();
                 eb.setThumbnail(member.getAvatarUrl());
-                eb.setAuthor("LEVEL " + (int) level + "!!");
+                eb.setTitle("LEVEL " + (int) level + "!!");
                 eb.setThumbnail(Main.getLevelImage());
                 eb.setColor(new Color(66, 135, 245));
                 eb.setDescription(

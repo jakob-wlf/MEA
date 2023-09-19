@@ -120,7 +120,7 @@ public class MessageListener extends ListenerAdapter {
     private static EmbedBuilder getLevelUpEmbed(MessageReceivedEvent e, long currentXp) {
         EmbedBuilder eb = new EmbedBuilder();
         eb.setThumbnail(Main.getLevelUpImage());
-        eb.setAuthor("Level Up!!!");
+        eb.setTitle("Level Up!!!");
         eb.setColor(new Color(66, 135, 245));
         eb.setDescription(
                 "Congratulations " + Objects.requireNonNull(e.getMember()).getAsMention() + "! \n" +

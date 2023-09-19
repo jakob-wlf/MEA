@@ -35,7 +35,7 @@ public class MuteCmd extends Command {
         if (muteMember == null)
             throw new MemberNotFoundException("The member you are trying to mute could not be found.");
 
-        long time = checkForValidTime(args[1], getSyntax());
+        long time = checkForValidTime(args[1], getSyntax(), true);
         if(time > 0)
             muteMember.timeoutFor(time, TimeUnit.MILLISECONDS).queue();
 
@@ -67,7 +67,7 @@ public class MuteCmd extends Command {
         if (muteMember == null)
             throw new MemberNotFoundException("The member you are trying to mute could not be found.");
 
-        long time = checkForValidTime(Objects.requireNonNull(event.getOption("time", OptionMapping::getAsString)), getSyntax());
+        long time = checkForValidTime(Objects.requireNonNull(event.getOption("time", OptionMapping::getAsString)), getSyntax(), true);
         if(time > 0)
             muteMember.timeoutFor(time, TimeUnit.MILLISECONDS).queue();
 
