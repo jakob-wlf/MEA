@@ -19,7 +19,8 @@ import java.awt.*;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static de.firecreeper82.util.Util.checkForValidTime;
 
@@ -57,23 +58,40 @@ public class PollCommand extends Command {
 
         EmbedBuilder eb = Util.createEmbed(title, new Color(252, 33, 117), description, "Poll ends ", Instant.ofEpochMilli(System.currentTimeMillis() + time), null, null);
         textChannel.sendMessageEmbeds(eb.build()).queue(msg -> {
+
             msg.addReaction(checkMarkEmoji).queue();
             msg.addReaction(xEmoji).queue();
             pollListener.addPoll(msg);
 
             //New Embed when Poll is finished
+            Timer timer = new Timer();
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
 
-            String newDescription = rawDescription + "\n**The Poll has ended.**";
-            newDescription += "\n**" + pollListener.getResults(msg)[0] + "** have voted  " + checkMarkEmoji.getAsReactionCode();
-            newDescription += "\n**" + pollListener.getResults(msg)[1] + "** have voted  " + xEmoji.getAsReactionCode();
+                    int[] results = new int[2];
 
-            eb.clear();
-            eb.setTitle(title + " (Ended)");
-            eb.setDescription(newDescription);
-            eb.setFooter("Poll ended");
-            eb.setTimestamp(Instant.now());
-            eb.setColor(new Color(252, 33, 117));
-            msg.editMessageEmbeds(eb.build()).queueAfter(time, TimeUnit.MILLISECONDS);
+                    msg.retrieveReactionUsers(checkMarkEmoji).queue(usersCheck -> {
+                        results[0] = usersCheck.size() - 1;
+
+                        msg.retrieveReactionUsers(xEmoji).queue(usersX -> {
+                            results[1] = usersX.size() - 1;
+
+                            String newDescription = rawDescription + "\n**The Poll has ended.**";
+                            newDescription += "\n**" + results[0] + "** have voted  " + checkMarkEmoji.getAsReactionCode();
+                            newDescription += "\n**" + results[1] + "** have voted  " + xEmoji.getAsReactionCode();
+
+                            eb.clear();
+                            eb.setTitle(title + " (Ended)");
+                            eb.setDescription(newDescription);
+                            eb.setFooter("Poll ended");
+                            eb.setTimestamp(Instant.now());
+                            eb.setColor(new Color(252, 33, 117));
+                            msg.editMessageEmbeds(eb.build()).queue();
+                        });
+                    });
+                }
+            }, time);
         });
     }
 
