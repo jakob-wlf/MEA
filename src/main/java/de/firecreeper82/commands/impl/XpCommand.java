@@ -55,7 +55,11 @@ public class XpCommand extends Command {
 
                 long newLevelXp = (long) Math.pow(level + 1, 2.5);
 
-                StringBuilder bars = getXpBar(newLevelXp, currentXp);
+                long lastLevelXp = (long) Math.pow(level, 2.5);
+                long xpNeeded = newLevelXp - lastLevelXp;
+                long xpHas = currentXp - lastLevelXp;
+
+                StringBuilder bars = getXpBar(xpNeeded, xpHas);
 
 
                 EmbedBuilder eb = new EmbedBuilder();
@@ -64,7 +68,7 @@ public class XpCommand extends Command {
                 eb.setThumbnail(Main.getLevelImage());
                 eb.setColor(new Color(66, 135, 245));
                 eb.setDescription(
-                        "You have **" + currentXp + "/" + newLevelXp  + "** xp" +
+                        "You have **" + xpHas + "/" + xpNeeded  + "** xp" +
                         "```ansi\n" + bars + "\n```\n"
                 );
                 eb.setTimestamp(Instant.now());
@@ -76,21 +80,29 @@ public class XpCommand extends Command {
     }
 
     @NotNull
-    private static StringBuilder getXpBar(long newLevelXp, long currentXp) {
+    private static StringBuilder getXpBar(long xpNeeded, long xpHas) {
         int barCount = 30;
         String greenBar = "\u001B[2;32m\u001B[0m\u001B[2;32m❚\u001B[0m";
-        String grayBar = "\u001B[2;32m\u001B[0m\u001B[2;32m\u001B[2;30m❚\u001B[0m\u001B[2;32m\u001B[0m";
+        String grayBar = "\u001B[2;30m❚\u001B[0m";
 
-        long greenCount = (long) Math.floor(((double) barCount / newLevelXp) * currentXp);
+        long greenCount = (long) Math.floor(((double) barCount / xpNeeded) * xpHas);
         long grayCount = barCount - greenCount;
+
+        System.out.println(greenCount);
+        System.out.println(grayCount);
 
         StringBuilder bars = new StringBuilder();
         for(int i = 0; i < greenCount; i++) {
             bars.append(greenBar);
+            System.out.println(i + " -- green");
         }
         for(int i = 0; i < grayCount; i++) {
             bars.append(grayBar);
+            System.out.println(i + " -- gray");
         }
+        bars.append(" ");
+        System.out.println(bars);
+
         return bars;
     }
 }
