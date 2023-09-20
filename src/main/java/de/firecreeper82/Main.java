@@ -2,10 +2,7 @@ package de.firecreeper82;
 
 import de.firecreeper82.commands.CommandManager;
 import de.firecreeper82.commands.impl.*;
-import de.firecreeper82.listeners.JoinListener;
-import de.firecreeper82.listeners.MessageListener;
-import de.firecreeper82.listeners.PollListener;
-import de.firecreeper82.listeners.SlashListener;
+import de.firecreeper82.listeners.*;
 import de.firecreeper82.permissions.Permission;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -37,6 +34,7 @@ public class Main {
     private static String levelingChannelID;
     private static String levelUpImage;
     private static String levelImage;
+    private static String ticketsCategoryId;
     private static JSONArray bannedLinks;
     private static JSONArray autoRoleIDs;
     private static long xpPerMessage;
@@ -57,6 +55,7 @@ public class Main {
                 .addEventListeners(new MessageListener())
                 .addEventListeners(new SlashListener())
                 .addEventListeners(new JoinListener())
+                .addEventListeners(new TicketListener())
                 .addEventListeners(pollListener)
                 .build();
 
@@ -110,6 +109,12 @@ public class Main {
                 Permission.ADMIN,
                 pollListener
         ));
+        commandManager.addCommand(new TicketCommand(
+                new String[]{"ticket"},
+                "Create the ticket embed",
+                List.of(),
+                Permission.ADMIN
+        ));
 
         Main.jda.updateCommands().addCommands(
                 Commands.slash("ban", "Ban a user from the server")
@@ -131,7 +136,8 @@ public class Main {
                 Commands.slash("poll", "Create a poll")
                         .addOption(OptionType.STRING, "title", "The title of the poll", true)
                         .addOption(OptionType.STRING, "time", "The time for the poll (1m/1h/1d/1w)", true)
-                        .addOption(OptionType.STRING, "description", "The description of the poll (Use \"\\n\" for line break)", true)
+                        .addOption(OptionType.STRING, "description", "The description of the poll (Use \"\\n\" for line break)", true),
+                Commands.slash("ticket", "Create the ticket embed")
         ).queue();
 
         readConfig();
@@ -189,6 +195,7 @@ public class Main {
             levelingChannelID = (String) jsonObject.get("LevelingChannelID");
             levelUpImage = (String) jsonObject.get("LevelUpImage");
             levelImage = (String) jsonObject.get("LevelImage");
+            ticketsCategoryId = (String) jsonObject.get("TicketsCategoryId");
             bannedLinks = (JSONArray) jsonObject.get("BannedLinks");
             autoRoleIDs = (JSONArray) jsonObject.get("AutoRoleIDs");
             xpPerMessage = (long) jsonObject.get("XpPerMessage");
@@ -231,6 +238,11 @@ public class Main {
     public static boolean isDeleteCommandFeedback() {
         readConfig();
         return deleteCommandFeedback;
+    }
+
+    public static String getTicketsCategoryId() {
+        readConfig();
+        return ticketsCategoryId;
     }
 
     public static boolean isLogCommandUsage() {

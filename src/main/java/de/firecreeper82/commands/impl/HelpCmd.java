@@ -57,7 +57,8 @@ public class HelpCmd extends Command {
                     Util.capitalize(cmd.getAliases()[0]),
                     "Aliases: `" + String.join(", ", cmd.getAliases()) + "`\n" +
                             "Syntax: `" + cmd.getSyntax()  + "`\n" +
-                            "Description: `" + cmd.getDescription() + "`\n\n" +
+                            "Description: `" + cmd.getDescription() + "`\n" +
+                            "Required Permission: `" + cmd.getRequiredPerm().name().substring(0, 1).toUpperCase() + cmd.getRequiredPerm().name().substring(1).toLowerCase() + "`\n\n" +
                             "**--------------------------------------------------------------------**\n",
                     false
             );
