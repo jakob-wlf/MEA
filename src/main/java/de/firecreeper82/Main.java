@@ -26,6 +26,7 @@ public class Main {
     private static String guildId;
     private static String adminRoleId;
     private static String moderationRoleId;
+    private static String everyoneRoleId;
     private static boolean notifyUserAtModerationAction;
     private static boolean logCommandUsage;
     private static boolean deleteCommandFeedback;
@@ -174,6 +175,7 @@ public class Main {
         HashMap<String, String> values = new HashMap<>();
         values.put("admin", adminRoleId);
         values.put("moderation", moderationRoleId);
+        values.put("everyone", everyoneRoleId);
         return values;
     }
 
@@ -185,6 +187,7 @@ public class Main {
 
             adminRoleId = (String) jsonObject.get("AdminPermissionRoleID");
             moderationRoleId = (String) jsonObject.get("ModerationPermissionRoleID");
+            everyoneRoleId = (String) jsonObject.get("EveryonePermissionRoleID");
 
             guildId = (String) jsonObject.get("GuildID");
             notifyUserAtModerationAction = (Boolean) jsonObject.get("NotifyUserAtModerationAction");

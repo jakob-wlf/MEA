@@ -3,6 +3,7 @@
 
   "AdminPermissionRoleID": "1139926650201583757",
   "ModerationPermissionRoleID": "1139926830959296705",
+  "EveryonePermissionRoleID": "1139918205343760506",
 
   "NotifyUserAtModerationAction": true,
   "LogCommandUsage": true,
