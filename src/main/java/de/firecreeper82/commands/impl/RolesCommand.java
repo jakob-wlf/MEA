@@ -3,6 +3,7 @@ package de.firecreeper82.commands.impl;
 import de.firecreeper82.Main;
 import de.firecreeper82.commands.Command;
 import de.firecreeper82.exceptions.exceptions.*;
+import de.firecreeper82.listeners.RolesListener;
 import de.firecreeper82.permissions.Permission;
 import de.firecreeper82.util.Util;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -20,16 +21,19 @@ import org.json.simple.parser.ParseException;
 import java.awt.*;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
 public class RolesCommand extends Command {
 
-    public RolesCommand(String[] aliases, String description, List<String> requiredArgs, Permission requiredPerm) {
+    public RolesCommand(String[] aliases, String description, List<String> requiredArgs, Permission requiredPerm, RolesListener rolesListener) {
         super(aliases, description, requiredArgs, requiredPerm);
+        rolesListener.setRolesCommand(this);
     }
+
+    private HashMap<Emoji, Role> roles;
+    private Message rolesMessage;
 
     @Override
     public void onCommand(String[] args, Message message, Member member) throws MemberNotFoundException, WrongArgumentsException, InvalidArgumentsException, InterruptedException, RoleNoFoundException, MemberIsAlreadyMutedException, MemberIsNotMutedException, SomethingWentWrongException, IOException, ParseException {
@@ -42,6 +46,8 @@ public class RolesCommand extends Command {
 
     private void createRolesEmbed(TextChannel channel) throws IOException, ParseException{
 
+        roles = new HashMap<>();
+
         JSONParser jsonParser = new JSONParser();
         FileReader reader = new FileReader("src/main/resources/config.json");
         JSONObject jsonObject = (JSONObject) jsonParser.parse(reader);
@@ -49,21 +55,16 @@ public class RolesCommand extends Command {
         JSONArray rolesArray = (JSONArray) jsonObject.get("SelfRoles");
 
         StringBuilder builder = new StringBuilder();
-        HashMap<Emoji, Role> roles = new HashMap<>();
 
         for(Object o : rolesArray) {
             if(!(o instanceof JSONObject roleObject))
                 continue;
 
             String name = (String) roleObject.get("name");
-            String id = (String) roleObject.get("id");
             String emoji = (String) roleObject.get("emoji");
 
             Emoji reaction = Emoji.fromUnicode(emoji);
             builder.append(name.substring(0, 1).toUpperCase()).append(name.substring(1).toLowerCase()).append(":  ").append(reaction.getAsReactionCode()).append("\n");
-            Role role = Objects.requireNonNull(Main.jda.getGuildById(Main.getGuildId())).getRoleById(id);
-
-            roles.put(reaction, role);
         }
 
 
@@ -79,7 +80,21 @@ public class RolesCommand extends Command {
         );
 
         channel.sendMessageEmbeds(eb.build()).queue(msg -> {
+            for(Object o : rolesArray) {
+                if(!(o instanceof JSONObject roleObject))
+                    continue;
 
+                rolesMessage = msg;
+
+                String id = (String) roleObject.get("id");
+                String emoji = (String) roleObject.get("emoji");
+
+                Emoji reaction = Emoji.fromUnicode(emoji);
+                Role role = Objects.requireNonNull(Main.jda.getGuildById(Main.getGuildId())).getRoleById(id);
+
+                msg.addReaction(reaction).queue();
+                roles.put(reaction, role);
+            }
         });
     }
 
@@ -91,5 +106,13 @@ public class RolesCommand extends Command {
         createRolesEmbed((TextChannel) event.getChannel());
 
         event.reply("Successfully created the roles embed").setEphemeral(true).queue();
+    }
+
+    public HashMap<Emoji, Role> getRoles() {
+        return roles;
+    }
+
+    public Message getRolesMessage() {
+        return rolesMessage;
     }
 }

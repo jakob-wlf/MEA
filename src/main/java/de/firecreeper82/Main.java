@@ -48,6 +48,7 @@ public class Main {
         TOKEN = reader.readLine();
 
         PollListener pollListener = new PollListener();
+        RolesListener rolesListener = new RolesListener();
         jda = JDABuilder.createDefault(TOKEN)
                 .setActivity(Activity.watching("you"))
                 .enableIntents(GatewayIntent.MESSAGE_CONTENT)
@@ -57,6 +58,7 @@ public class Main {
                 .addEventListeners(new SlashListener())
                 .addEventListeners(new JoinListener())
                 .addEventListeners(new TicketListener())
+                .addEventListeners(rolesListener)
                 .addEventListeners(pollListener)
                 .build();
 
@@ -120,7 +122,8 @@ public class Main {
                 new String[]{"roles"},
                 "Create the roles embed",
                 List.of(),
-                Permission.ADMIN
+                Permission.ADMIN,
+                 rolesListener
         ));
 
         Main.jda.updateCommands().addCommands(
