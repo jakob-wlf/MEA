@@ -24,6 +24,24 @@
       "pornhub.com"
   ],
 
+  "SelfRoles": [
+    {
+      "name": "announcements",
+      "id": "1154372802254733332",
+      "emoji": "\uD83D\uDCE3"
+    },
+    {
+      "name": "games",
+      "id": "1154455654371692694",
+      "emoji": "\uD83C\uDFAE"
+    },
+    {
+      "name": "movies",
+      "id": "1154455939336917013",
+      "emoji": "\uD83C\uDFA5"
+    }
+  ],
+
   "AutoRoleIDs": [
     "1151593060053045381"
   ]

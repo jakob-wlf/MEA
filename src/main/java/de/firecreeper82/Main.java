@@ -116,6 +116,12 @@ public class Main {
                 List.of(),
                 Permission.ADMIN
         ));
+        commandManager.addCommand(new RolesCommand(
+                new String[]{"roles"},
+                "Create the roles embed",
+                List.of(),
+                Permission.ADMIN
+        ));
 
         Main.jda.updateCommands().addCommands(
                 Commands.slash("ban", "Ban a user from the server")
@@ -138,7 +144,8 @@ public class Main {
                         .addOption(OptionType.STRING, "title", "The title of the poll", true)
                         .addOption(OptionType.STRING, "time", "The time for the poll (1m/1h/1d/1w)", true)
                         .addOption(OptionType.STRING, "description", "The description of the poll (Use \"\\n\" for line break)", true),
-                Commands.slash("ticket", "Create the ticket embed")
+                Commands.slash("ticket", "Create the ticket embed"),
+                Commands.slash("roles", "Create the roles embed")
         ).queue();
 
         readConfig();
